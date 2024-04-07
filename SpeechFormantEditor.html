@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Speech Formant Editor</title>
+<!-- Include your charting library and CSS files here -->
+<!--<script type=module src="chart.js/dist/chart.js"></script>-->
+<link href="_.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+
+<div class="x_axis_class">
+<span>Custom Formant Editor <br><br> Formant Curve</span>
+<br>
+    <select id="formant_selector" class="corner-dropdown">
+        <option value="0"> F0 </option>
+        <option value="1" class="insert_formant_class"> Insert New Formant Layer </option>
+        <option value="2" class="remove_current_formant_class"> Remove (Current) Formant </option>
+    </select>
+</div>
+
+<div id="confirmBox" class="confirm-box">
+    <div class="confirm-content">
+        <div id="messageCaption" class="confirm-message">Re-sample the audio signal ?</div>
+        <button id="confirmYes" class="confirm-button">Yes</button>
+        <button id="confirmNo" class="confirm-button">No</button>
+    </div>
+</div>
+
+<div class="x_axis_class">
+    <div class="x_axis_class"> PCM Encoding:<br>
+        <select id="resolution_selector" class="corner-dropdown resolution_selector_class">
+            <option value="0">PCM 16-bit/44.1 KHz</option>
+            <option value="1">PCM 16-bit/48 KHZ</option>
+            <option value="2">PCM 16-bit/88.2 KHZ</option>
+            <option value="3">PCM 16-bit/96 KHZ</option>
+            <option value="4">PCM 16-bit/192 KHZ</option>
+            <option value="5">PCM 16-bit/384 KHZ</option>
+            <option value="6">PCM 16-bit/768 KHZ</option>
+            <option value="7">PCM 24-bit/44.1 KHZ</option>
+            <option value="8">PCM 24-bit/48 KHZ</option>
+            <option value="9">PCM 24-bit/88.2 KHZ</option>
+            <option value="10">PCM 24-bit/96 KHZ</option>
+            <option value="11">PCM 24-bit/192 KHZ</option>
+            <option value="12">PCM 24-bit/384 KHZ</option>
+            <option value="13">PCM 24-bit/768 KHZ</option>
+            <option value="14">PCM 32-bit/44.1 KHZ</option>
+            <option value="15">PCM 32-bit/48 KHZ</option>
+            <option value="16">PCM 32-bit/88.2 KHZ</option>
+            <option value="17">PCM 32-bit/96 KHZ</option>
+            <option value="18">PCM 32-bit/192 KHZ</option>
+            <option value="19">PCM 32-bit/384 KHZ</option>
+            <option value="20">PCM 32-bit/768 KHZ</option>
+            <option value="21">PCM 64-bit/44.1 KHZ</option>
+            <option value="22">PCM 64-bit/48 KHZ</option>
+            <option value="23">PCM 64-bit/88.2 KHZ</option>
+            <option value="24">PCM 64-bit/96 KHZ</option>
+            <option value="25">PCM 64-bit/192 KHZ</option>
+            <option value="26">PCM 64-bit/384 KHZ</option>
+            <option value="27">PCM 64-bit4/768 KHz</option>
+        </select>
+    </div>
+</div>
+
+<br>
+
+<div class="x_axis_class">
+<div class="selector">
+    <button id="amplitudeBtn" class="selected">Amplitude</button>
+    <button id="frequencyBtn">Frequency</button>
+</div>
+</div>
+<div id="editor-container">
+
+    <canvas id="formant-graph"></canvas>
+
+</div>
+
+<div id="progressBarContainer" class="transition_container_class">
+    <div id="progressBar" class="transition_class"></div>
+</div>
+
+<div>
+    | <button id="SineBTN" class="btn_class radio_button_class">Sine</button>
+    | <button id="CosineBTN" class="btn_class radio_button_class">Cosine</button>
+    | <button id="SquareBTN" class="btn_class radio_button_class">Square</button>
+    | <button id="SawBTN" class="btn_class radio_button_class">F. Sawtooth</button>
+    | <button id="RSawBTN" class="btn_class radio_button_class">R. Sawtooth</button>
+    | <button id="TriangleBTN" class="btn_class radio_button_class">Triangle</button>
+    | <button id="PurpleBTN" class="btn_class radio_button_class" title="+ 6 dB per octave">Purple Noise</button>
+    | <button id="BlueBTN" class="btn_class radio_button_class" title="+ 3 dB per octave">Blue Noise</button>
+    | <button id="PinkBTN" class="btn_class radio_button_class" title="- 3 dB per octave">Pink Noise</button>
+    | <button id="BrownBTN" class="btn_class radio_button_class" title="- 6 dB per octave">Brown Noise</button>
+    | <button id="GaussBTN" class="btn_class radio_button_class">White Gaussian Noise</button>
+    | <div class="btn_align_right_class">
+        | <button id="AmplitudeBezierBTN" title="Employ smooth Bezier ampltidue curves" class="btn_class"> Ampltitude (Smooth) </button>
+        | <button id="FrequencyBezierBTN" title="Employ smooth Bezier Frequency curves" class="btn_class"> Frequency (Smooth) </button>
+         | <button id="AudioBTN" class="btn_class">((&gt; Audition Audio</button>
+         | <button id="Cpp20BTN" class="btn_class">)) Preview Signal ((</button>
+         | <div id="audioPlaybackControls" class="audioPlaybackControls_class"></div>
+        </div>
+</div>
+<div>&nbsp;</div>
+<div> | <button id="InJsonBTN" class="btn_class"> Load JSON </button>
+    | <button id="OutJsonBTN" class="btn_class"> Generate JSON </button>
+    | <button id="AddFramesBTN" class="btn_class"> Insert </button>
+
+    <select id="add_frames_selector" class="corner-dropdown">
+        <option value="0"> 1 </option>
+        <option value="1"> 2 </option>
+        <option value="2"> 5 </option>
+        <option value="3"> 10 </option>
+        <option value="4"> 25 </option>
+        <option value="5"> 100 </option>
+        <option value="6"> 200 </option>
+        <option value="7"> 400 </option>
+        <option value="8"> 1_000 </option>
+        <option value="9"> 2_500 </option>
+        <option value="10"> 5_000 </option>
+        <option value="11"> 11_025 </option>
+        <option value="12"> 22_050 </option>
+        <option value="13"> 48_000 </option>
+        <option value="14"> 92_025 </option>
+        <option value="15"> 96_000 </option>
+        <option value="16"> 192_000 </option>
+        <option value="17"> 384_000 </option>
+        <option value="18"> 768_000 </option>
+    </select> Frames
+    | <button id="RemoveFramesBTN" class="btn_class"> Remove </button>
+
+    <select id="remove_frames_selector" class="corner-dropdown">
+        <option value="0"> 1 </option>
+        <option value="1"> 2 </option>
+        <option value="2"> 5 </option>
+        <option value="3"> 10 </option>
+        <option value="4"> 25 </option>
+        <option value="5"> 100 </option>
+        <option value="6"> 200 </option>
+        <option value="7"> 400 </option>
+        <option value="8"> 1_000 </option>
+        <option value="9"> 2_500 </option>
+        <option value="10"> 5_000 </option>
+        <option value="11"> 11_025 </option>
+        <option value="12"> 22_050 </option>
+        <option value="13"> 48_000 </option>
+        <option value="14"> 92_025 </option>
+        <option value="15"> 96_000 </option>
+        <option value="16"> 192_000 </option>
+        <option value="17"> 384_000 </option>
+        <option value="18"> 768_000 </option>
+    </select> Frames |
+    <div class="btn_align_right_class">
+        | <button id="UndoBTN" class="btn_class"> UNDO ACTION </button>
+        | <button id="RedoBTN" class="btn_class"> REDO ACTION </button>
+        |
+    </div>
+</div>
+
+<div id="popupContainer" class="popup-container"><!--popup window container. class name may be changed-->
+    <div class="popup-content">
+        <!-- Your popup content here -->
+        <div id="json_form_class" class="json-form-class">
+            <textarea id="JsonTA" rows="10" cols="100" placeholder="Paste .JSON into textarea" class="json-textarea-class" spellcheck="false"></textarea>
+            <div id="jsonFORM">
+            <div>| <button id="okBTN" class="btn_class"> OK </button>
+                | <button id="cancelBTN" class="btn_class"> CANCEL </button> | </div>
+            </div>
+            <div id="waveform_container" width="90%;" height="35%">
+                <canvas id="waveform_viewer_canvas"></canvas>
+            </div>
+        </div>
+        <div id="slider_container" class="slider-container"></div>
+        <span id="CloseJsonBTN" class="close-btn">×</span><!-- close popup window button -->
+    </div>
+</div>
+
+<footer>
+    <script src="chart.js/dist/chart.umd.js"></script>
+    <script src="_.js"></script>
+</footer>
+
+</body>
+</html>

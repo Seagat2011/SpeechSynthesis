@@ -1,0 +1,364 @@
+body {
+    background-color: #333;
+}
+
+div {
+    background-color: #333;
+    color: #fff;
+    font-family: sans-serif;
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+}
+
+select:hover {
+    color: #eee;
+}
+
+#editor-container, .waveform-container {
+    position: relative;
+    display: grid;
+    background-color: #333; /* Adjust to match the image */
+}
+/*
+#waveform_container {
+    position: relative; /* Or absolute/fixed/sticky depending on your layout needs * /
+    z-index: 10; /* Adjust this value as needed to be higher than other elements * /
+}
+*/
+.corner-dropdown {
+    color: #888;
+    background-color: #333;
+    border: 1px solid #666;
+    border-radius: 5px;
+    padding: 5px;
+    padding-top: 1px;
+    font-size: 12px;
+    display: inline-block;
+}
+
+.btn_class {
+    width: 107px;
+    color: white;/*#888;*/
+    padding: 4px;
+    padding-bottom: 5px;
+    /*border-color: #444;*/
+    border: 0px;
+    background-color: #444;
+}
+
+.btn_class:hover {
+    /*color: #aaa;*/
+    background-color: #666;
+}
+
+.btn_class:active {
+    background-color: #0000ae; /*#4488ff;*/
+}
+
+.btn_class::selection {
+    background-color: #0000ae;
+}
+
+.btn_class_selection {
+    background-color: #0000ae;
+}
+
+.btn_align_right_class {
+    display: inline;
+    float: right;
+}
+
+.json-form-class {
+    font-family: 'Courier New', Courier, monospace;
+    margin: 5px;
+    display: none;
+}
+
+.json-textarea-class {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 10pt;
+    display: block;
+}
+
+.x_axis_class {
+    color:#888;
+    width:100%;
+    text-align:center;
+    margin-bottom: 10px;
+}
+
+.radio_button_class {
+    text-decoration: none;
+}
+
+.insert_formant_class,
+.remove_current_formant_class { 
+    text-decoration: none;
+}
+
+/* Color-coding for dropdowns */
+
+#formant-graph, .formant-graph-canvas {
+    background-color: rgb(50, 50, 50); /* Set your desired color */
+}
+
+.formant-graph-canvas {
+    width: fit-content;
+    height: 600px;
+    display: contents;
+}
+
+  /* Container style */
+.popup-container {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Enable scroll if needed */
+    /*color: #333*/;
+    background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+    justify-content: center;
+    align-items: center;
+}
+
+/* Popup content style */
+.popup-content {
+    background-color: #fefefe; /*#333;*/
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be adjustable */
+    justify-content: center;
+    display: contents;
+}
+
+/* Close button style */
+.close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    display: grid;
+    padding-bottom: 256px; /* floating close button */
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: #880000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.transition_container_class {
+    padding-left: 5px;
+    padding-bottom: 10px;
+}
+
+.transition_class {
+    width: 0%;
+    height: 2px;
+    display: none;
+    border-radius:10px;
+    background-color: #00aa00;
+    transition: width 0.25s ease-in-out;
+}
+
+.transition_class:hover {
+    background-color: #00ee00;
+}
+
+/* Confirm window stylings */
+
+/* style.css */
+
+.confirm-box {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.confirm-content {
+    background-color: #333;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 30%; /* Could be more or less, depending on screen size */
+    border-radius: 16px;
+    text-align: center;
+}
+
+.confirm-message {
+    color: #aaa;
+    margin-bottom: 20px;
+}
+
+.confirm-button {
+    padding: 10px 20px;
+    margin: 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+}
+
+.settings_button_class {
+    color: #aaa;
+    background-color: #333;
+    border: 1px solid #666;
+    border-radius: 5px;
+    padding-top: 5px;
+    font-size: 12px;
+    display: inline-block;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.resolution_selector_class {
+    width: 180px;
+}
+
+.selector {
+    display: inline-block;
+    background: #444;
+    border: 1px solid #555;
+    border-radius: 20px;
+    overflow: hidden;
+    font-family: roboto condensed;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.selector button {
+    background: none;
+    border: none;
+    color: #fff;
+    padding: 10px 20px;
+    cursor: pointer;
+    outline: none;
+    font-size: 12px;
+  }
+
+.selector button.selected {
+    background: #333;
+    font-weight: bold;
+}
+
+.selector button:not(.selected):hover {
+    background: #444;
+}
+
+.slider-container {
+    margin: 20px;
+    padding: 10px;
+    display: none;
+}
+
+.slider-container > div {
+    margin-bottom: 20px;
+}
+
+.slider-container label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.slider-container input[type=range] {
+-webkit-appearance: none; /* Override default appearance */
+    appearance: none;
+    /*width: 60%; /* Full-width */
+    height: 15px; /* Specified height */
+    background: #333; /* Dark background */
+    outline: none; /* Remove outline */
+    opacity: 0.7; /* Set transparency (cross-browser) */
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+    display: inline-block;
+}
+
+.slider-container input[type=range]:hover {
+    opacity: 1; /* Fully opaque on hover */
+}
+
+/* Slider thumb */
+.slider-container input[type=range]::-webkit-slider-thumb {
+-webkit-appearance: none; /* Override default appearance */
+    appearance: none;
+    width: 25px; /* Width of the slider thumb */
+    height: 25px; /* Height of the slider thumb */
+    background: #1E90FF; /* Blue background */
+    cursor: pointer; /* Cursor on hover */
+    border-radius: 50%; /* Circular shape */
+}
+
+.slider-container input[type=range]::-moz-range-thumb {
+    width: 15px; /* Width of the slider thumb */
+    height: 15px; /* Height of the slider thumb */
+    background: #1E90FF; /* Blue background */
+    cursor: pointer; /* Cursor on hover */
+    border-radius: 50%; /* Circular shape */
+}
+
+/* Slider Track */
+.slider-container input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8.4px;
+    cursor: pointer;
+    /*animate: 0.2s;*/
+    box-shadow: none;
+    background: #555;
+    border-radius: 1.3px;
+    border: 0.2px solid #010101;
+}
+
+.slider-container input[type=range]::-moz-range-track {
+    width: 100%;
+    height: 8.4px;
+    cursor: pointer;
+    /*animate: 0.2s;*/
+    box-shadow: none;
+    background: #555;
+    border-radius: 1.3px;
+    border: 0.2px solid #010101;
+}
+
+.slider-container input[type=range]::-ms-track {
+    width: 100%;
+    height: 8.4px;
+    cursor: pointer;
+    /*animate: 0.2s;*/
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+}
+
+/* Output styles */
+.slider-container span {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.slider-container .min-value,
+.slider-container .max-value {
+  color: #aaa; /* Lighter text color for the min and max values */
+  font-size: 0.8em;
+  padding: 0 10px;
+  display: inline-block;
+}
+
+.audioPlaybackControls_class {
+    display: inline;
+    width: 100%;
+    height: 32px;
+    text-align: center;
+}
