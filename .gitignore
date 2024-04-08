@@ -1,1 +1,5 @@
+# workspace files
 *.code-workspace
+
+# utility files
+~.js
