@@ -687,6 +687,36 @@ function updateActiveRadioButton(rButton) {
 			}
 		}
 	});
+
+	const PreviousAmplitudeStatus = AmplitudeBezierBTN.activeFlag;
+	const PreviousFrequencyStatus = FrequencyBezierBTN.activeFlag;
+
+	const SmoothAmplitudeActiveFlag = Formants[g_lastSelectedFormantIndex].amplitude_as_bezierCurve_flag 
+		? true
+		: false;	
+	const SmoothFrequencyActiveFlag = Formants[g_lastSelectedFormantIndex].frequency_as_bezierCurve_flag 
+		? true
+		: false;
+
+	AmplitudeBezierBTN.activeFlag = SmoothAmplitudeActiveFlag ? true : false;
+	AmplitudeBezierBTN.style.backgroundColor = SmoothAmplitudeActiveFlag ? activeColor : defaultColor;
+
+	FrequencyBezierBTN.activeFlag = SmoothFrequencyActiveFlag ? true : false;
+	FrequencyBezierBTN.style.backgroundColor = SmoothFrequencyActiveFlag ? activeColor : defaultColor;
+
+	const amplitudeCurve = 0;
+	const frequencyCurve = 1;
+
+	g_formantChart.data.datasets[amplitudeCurve].lineTension = SmoothAmplitudeActiveFlag ? g_bezier_lineTension : g_default_lineTension ;
+	g_formantChart.data.datasets[frequencyCurve].lineTension = SmoothFrequencyActiveFlag ? g_bezier_lineTension : g_default_lineTension ;	
+
+	if(
+		   (PreviousAmplitudeStatus != SmoothAmplitudeActiveFlag)
+		|| (PreviousFrequencyStatus != SmoothFrequencyActiveFlag)
+	){		
+		g_formantChart.update();
+	}
+
 }
 
 const ShapeButtonMappings = {
@@ -1238,14 +1268,13 @@ OutJsonBTN.addEventListener('click', function() {
 	showTAElement({ jsonINDIR: 'out' });
 });
 
-/** popup window actions  */
+/** Object window actions  */
 
-Object.prototype.add_point = function(b) {
-	return new POINT ({ x: this.x + b.x, y: this.y + b.y });
-};
+Object.prototype.last = function(){
+	let self = this;
+	const I = self.length-1;
 
-Object.prototype.mult_scalar = function(b) {
-	return new POINT ({ x: this.x * b, y: this.y * b });
+	return self[I];
 };
 
 /** trigonometric functions */
@@ -1754,6 +1783,7 @@ class signalParameters extends Object
 		this.cumulativePhase = 0;
 	}
 }
+
 /**
  * @brief Generates a signal based on specific wave-shape parameters.
  * @details Generates a signal based on specific wave-shape parameters.
@@ -1805,6 +1835,49 @@ function do_Blend(
 	return value;
 }
 
+function assignWaveShapeFuncs(fmt, wfm){
+	for (let _fmt_ of fmt) {
+		switch(_fmt_.shape) {			
+			case 'Sine': 
+				_fmt_.shape_func = wfm.SIN;
+				break;
+			case 'Cosine':
+				_fmt_.shape_func = wfm.cos;
+				break;
+			case 'Square':
+				_fmt_.shape_func = wfm.square;
+				break;
+			case 'F. Sawtooth':
+				_fmt_.shape_func = wfm.forwardSaw;
+				break;
+			case 'R. Sawtooth':
+				_fmt_.shape_func = wfm.ReverseSaw;
+				break;
+			case 'Triangle': 
+				_fmt_.shape_func = wfm.Triangle;
+				break;
+			case 'Pink Noise':
+				_fmt_.shape_func = wfm.pinkNoise;
+				break;
+			case 'Purple Noise':
+				_fmt_.shape_func = wfm.purpleVioletNoise;
+				break;
+			case 'Brown Noise':
+				_fmt_.shape_func = wfm.brownNoise;
+				break;
+			case 'Blue Noise':
+				_fmt_.shape_func = wfm.blueNoise;
+				break;
+			case 'White Gaussian Noise':
+				_fmt_.shape_func = wfm.whiteGaussianNoise;
+				break;
+			default:
+				throw (`GenerateComplexSignal > assignWaveShapeFuncs > Error: Unknown wave shape flag encountered - (${_fmt_.shape})! Aborting.`)
+				break;
+		}
+	}
+}
+
 /**
 @brief Generates complex signal based on specific wave-shape parameters.
 @details Generates complex signal based on specific wave-shape parameters.
@@ -1815,253 +1888,131 @@ function generateComplexSignal(
 	  shapes_oscilatorParamsVec
 	, customUpdateCallback) {
 
-	let idx = 0;
-	let frame_idx = 0;
 	let waveform = new FWaveform();
-	let audioFrames_float64Vec = [];
+	let channelDataLeft = [];
 	var defaultInterpolationMethod = LERP;
-	var smoothInterpolationMethod = quarticEaseInOut; // cubicHermite; quarticEaseInOut; sineArcInterpolation;
+	var smoothInterpolationMethod = quarticEaseInOut; // cubicHermite; quarticEaseInOut; sineArcInterpolation; //
 	const pcm_encoding = shapes_oscilatorParamsVec.pcm_encoding;
 
-	const hz_pcm_encoding = pcm_encoding_docstring_options[pcm_encoding].sample_rate * 1000;
+	const hz_pcm_encoding = pcm_encoding_docstring_options[pcm_encoding].sample_rate * 1000; // Khz //
 
+	const const_inv_hz_pcm_encoding = 1/hz_pcm_encoding;
 	const bit_depth_pcm_encoding = pcm_encoding_docstring_options[pcm_encoding].bit_depth;
 
-	const amplitude_pcm_encoding_dynamic_range = Math.pow(2, bit_depth_pcm_encoding - 1) - 1;
+	const amplitude_pcm_encoding_resolution = Math.pow(2, bit_depth_pcm_encoding - 1) - 1;
 
+	const amplitude_pcm_encoding_dynamic_range = amplitude_pcm_encoding_resolution / 2;
+
+	assignWaveShapeFuncs(shapes_oscilatorParamsVec, waveform);
+		
 	for (const shape_oscillatorParams of shapes_oscilatorParamsVec) {
 
-		// Ensure that the index is within the bounds of the shapes_oscilatorParamsVec array
-		if (idx >= shapes_oscilatorParamsVec.length)
-			break;
-		
-		let outShape = 0;
+		const I = shape_oscillatorParams.length - 1;
 
-		/*
-		
-		params = new signalParameters();
-
-		params.TIME = shape_oscillatorParams.frame + 1; 
+		const TIME = shape_oscillatorParams.last().frame + 1;
+	
+		// init waveshape params //
+		let params = new signalParameters();
+		// time characteristics //
+		params.TIME = TIME; // END // 
 		params.deltaTime = 1; // ie. 1 frame per time increment //
-
-		params.amplitude = db_start;
-		params.amplitudeStart = db_start;
-		params.amplitudeEnd = db_end;
-		params.amplitudeBlendStartFrame = frame_idx;
-		params.amplitudeBlendEndFrame = FRAME_IDX;
-		params.amplitudeBlendStrategy = shapes_oscilatorParamsVec.amplitude_as_bezierCurve_flag
-		? BLEND_STRATEGY.QIARTIC
-		: BLEND_STRATEGY.LERP;
-		
-		params.frequency = hz_start;
-		params.frequencyStart = hz_start;
-		params.frequencyEnd = hz_end;
-		params.frequencyBlendStartFrame = frame_idx;
-		params.frequencyBlendEndFrame = FRAME_IDX;
-		params.frequencyBlendStrategy = shapes_oscilatorParamsVec.frequency_as_bezierCurve_flag
+		// amplitude lerp targets //
+		params.amplitudeBlendStrategy = shape_oscillatorParams.amplitude_as_bezierCurve_flag
 		? BLEND_STRATEGY.QUARTIC
 		: BLEND_STRATEGY.LERP;
-
+		// frequency lerp targets //
+		params.frequencyBlendStrategy = shape_oscillatorParams.frequency_as_bezierCurve_flag
+		? BLEND_STRATEGY.QUARTIC
+		: BLEND_STRATEGY.LERP;
+		// phase charactersitics //
 		params.phase = 0;
 		params.cumulativePhase = 0;
 
-		*/
+		shape_oscillatorParams.map((from,i,me)=>{
 
-		// Custom updates using lambda
-		if (customUpdateCallback) {
-			outShape = customUpdateCallback(
-				this,
-				shape_oscillatorParams,
-				outShape);
-		} else {
-			const FRAME_IDX = shape_oscillatorParams.frame + 1;
-			
-			const t = frame_idx / FRAME_IDX;
-			const hz_start = shape_oscillatorParams.frequency;
-			const db_start = shape_oscillatorParams.amplitude;
-			const hz_end = shapes_oscilatorParamsVec[idx + 1].frequency;
-			const db_end = shapes_oscilatorParamsVec[idx + 1].amplitude;
-			
-			while(frame_idx < FRAME_IDX)
-			{
-				const nullShape = outShape;
+			if(i>=I) 
+				return from;
+
+			let to = me[i+1];
+	
+			const start_frame_idx = from.frame;
+			const end_frame_idx = to.frame;
+			const db_start = from.amplitude;
+			const db_end = to.amplitude;
+			const hz_start = from.frequency;
+			const hz_end = to.frequency;
+
+			// Update next interval waveshape params //
+
+			// time characteristics //
+			params.time = t; 
+			// amplitude characteristics //
+			params.amplitude = db_start;
+			params.amplitudeStart = db_start;
+			params.amplitudeEnd = db_end;
+			// amplitude lerp targets //
+			params.amplitudeBlendStartFrame = start_frame_idx;
+			params.amplitudeBlendEndFrame = end_frame_idx;
+			// frequency characteristics //
+			params.frequency = hz_start;
+			params.frequencyStart = hz_start;
+			params.frequencyEnd = hz_end;
+			// frequency lerp targets //
+			params.frequencyBlendStartFrame = start_frame_idx;
+			params.frequencyBlendEndFrame = end_frame_idx;
+
+			// frame interval targets //
+			let t = from.frame;
+			const FRAME_IDX = to.frame + 1;
+
+			while(t < FRAME_IDX){
 
 				const hz_stepRatio = linearStep(t, hz_start, hz_end);
 				const db_stepRatio = linearStep(t, db_start, db_end);
 				
-				const hz = 1 / hz_pcm_encoding * shapes_oscilatorParamsVec.frequency_as_bezierCurve_flag 
+				params.frequency = const_inv_hz_pcm_encoding * me.frequency_as_bezierCurve_flag 
 				? smoothInterpolationMethod(hz_stepRatio, hz_start, hz_end)
-				: defaultInterpolationMethod(hz_stepRatio, hz_start, hz_end);
+				: defaultInterpolationMethod(hz_stepRatio, hz_start, hz_end) ;
 				
-				const db = shapes_oscilatorParamsVec.frequency_as_bezierCurve_flag 
+				params.amplitude = me.amplitude_as_bezierCurve_flag 
 				? smoothInterpolationMethod(hz_stepRatio, db_start, db_end)
 				: defaultInterpolationMethod(db_stepRatio, db_start, db_end);
 
-				/*
-				// Use the do_Blend function to interpolate the amplitude and frequency values //
-				if (shapes_oscilatorParamsVec.amplitude_as_bezierCurve_flag) {
-					const db = do_Blend(
-						  params.amplitudeBlendStrategy
-						, db_stepRatio
-						, params.amplitudeStart
-						, params.amplitudeEnd);
+				const outShape = shape_oscillatorParams.shape_func(params);
+
+				if(outShape != null){
+					while(channelDataLeft.length < (t + 1))
+						channelDataLeft.push(0);
+
+					channelDataLeft[t] += outShape; // Careful not to saturate the dynamic range //
+					channelDataLeft[t] = clamp(
+						  channelDataLeft[t]
+						,-amplitude_pcm_encoding_dynamic_range
+						, amplitude_pcm_encoding_dynamic_range);
+
+					++t;
+				} else {
+					throw (`generateComplexSignal > Error: Formant number #:${i}, frame number #: ${frame_idx} Generation Error.`);
 				}
 
-				// Use the do_Blend function to interpolate the amplitude and frequency values //
-				if (shapes_oscilatorParamsVec.frequency_as_bezierCurve_flag) {
-					const hz = do_Blend(
-						  params.frequencyBlendStrategy
-						, hz_stepRatio
-						, params.frequencyStart
-						, params.frequencyEnd);
-				}
+			}
 
-				params.time = frame_idx;
+			return from;
 
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.Sine_enum))
-					outShape += waveform.SINE(params);
-				
-				*/
+		});
 
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.Sine_enum))
-					outShape += waveform.sine(
-						  db
-						, hz
-						, frame_idx
-						, shape_oscillatorParams.theta); 
+	} // End for(shape_oscillatorParams of shapes_oscilatorParamsVec)
 
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.Cosine_enum))
-					outShape += waveform.cosine(
-						  db
-						, hz
-						, frame_idx
-						, shape_oscillatorParams.theta);
+	let channelDataRight = [...channelDataLeft];
 
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.QuarterSine_enum))
-					outShape += waveform.quarterSine(
-						  db
-						, hz
-						, frame_idx
-						, shape_oscillatorParams.theta);
+	// shift LEFT/RIGHT channel alignment by 1 sample //
+	channelDataLeft.unshift(0);
+	// perform channel length matching //
+	channelDataRight.push(0);
 
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.HalfSine_enum))
-					outShape += waveform.halfSine(
-						  db
-						, hz
-						, frame_idx
-						, shape_oscillatorParams.theta);
+	return { channelDataLeft, channelDataRight };
 
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.Triangle_enum))
-					outShape += waveform.Triangle(
-						  db
-						, hz
-						, frame_idx);
-
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.Square_enum))
-					outShape += waveform.Square(
-						  db
-						, hz
-						, frame_idx);
-
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.ForwardSawtooth_enum))
-					outShape += waveform.forwardSaw(
-						  db
-						, hz
-						, frame_idx);
-
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.ReverseSawtooth_enum))
-					outShape += waveform.ReverseSaw(
-						  db
-						, hz
-						, frame_idx);
-
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.WhiteNoise_enum))
-					outShape += waveform.whiteNoise(db);
-
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.BrownNoise_enum))
-					outShape += waveform.brownNoise(
-						  db
-						, hz
-						, frame_idx);
-
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.PinkNoise_enum))
-					outShape += waveform.pinkNoise(
-						  db
-						, hz
-						, frame_idx);
-
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.YellowNoise_enum))
-					outShape += waveform.yellowNoise(
-						  db
-						, hz
-						, frame_idx);
-
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.BlueNoise_enum))
-					outShape += waveform.blueNoise(
-						  db
-						, hz
-						, frame_idx);
-
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.GreyNoise_enum))
-					outShape += waveform.greyNoise(
-						  db
-						, hz
-						, frame_idx);
-
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.WhiteGaussianNoise_enum))
-					outShape += waveform.whiteGaussianNoise(db);
-
-				if (has_shape(
-					  shape_oscillatorParams.shape
-					, WaveShape.PurpleVioletNoise_enum))
-					outShape += waveform.purpleVioletNoise();
-
-				if (outShape == nullShape)
-					throw ("invalid_argument to WaveShape generator - Unexpected or Unknown WaveShape type.");
-					//console.error(`Error at audio frame ${frame_idx} - Unknown or Unexpected wave-shape: ${shape_oscillatorParams.shape}`);
-					//throw std::invalid_argument("Unexpected or Unknown wave-shape.");
-				++frame_idx;
-			} // end of while statement
-		} // End of else statement
-
-		audioFrames_float64Vec.push(outShape);
-		++idx;
-	} // End of for loop
-
-	return audioFrames_float64Vec;
-}; // End of generateComplexSignal()
+} // End generateComplexSignal()
 
 function setInt24(view, offset, value) {
 	this.setUint8(offset, (value & 0xFF0000) >> 16);
@@ -2413,6 +2364,10 @@ AudioBTN.addEventListener('click', function() {
 
 	// Example usage
 	let wavBuffer = bufferToWave([channelDataLeft, channelDataRight]);
+
+	//const audio_frames = generateComplexSignal(Formants, null);
+
+	//let wavBuffer = bufferToWave([ audio_frames.channelDataLeft, audio_frames.channelDataRight ]);
 	let blob = new Blob([wavBuffer], {type: 'audio/wav'});
 	let url = URL.createObjectURL(blob);
 
@@ -2429,8 +2384,6 @@ AudioBTN.addEventListener('click', function() {
 	audio.classList.add('audioPlaybackControls_class');
 	audioPlaybackControls.innerHTML = '';
 	audioPlaybackControls.appendChild(audio);
-
-	const audio_frames = generateComplexSignal(Formants, null);
 });
 
 // Create a new CurveViewer chart instance
