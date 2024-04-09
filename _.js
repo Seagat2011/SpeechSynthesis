@@ -1302,54 +1302,6 @@ class FWaveform extends Object {
 	@return double ( The oscillator signal at time-step t).*/
 	SIN(params)
 	{
-		/**
-		
-		Adjusting the phase in your algorithm to maintain smoothness, 
-		especially during frequency transitions, requires a careful approach. 
-		The goal is to ensure that when the frequency changes, 
-		the phase does not introduce discontinuities or abrupt changes in the waveform. 
-		Here's an approach to adjust the phase dynamically to accommodate changes 
-		in frequency smoothly:
-		
-		1. Track the cumulative phase of the signal over time.
-		
-		This phase needs to be updated every time you generate a sample.
-		
-		2. Adjust Phase During Frequency Transition
-
-		When you change the frequency, adjust the starting phase 
-		of the new frequency to match the instantaneous phase of the ongoing signal. 
-		This helps in avoiding phase discontinuities.
-		
-		**/
-		
-		const oldFrequency = params.frequency;
-		params.cumulativePhase += 2 * Math.PI * oldFrequency * params.deltaTime / params.TIME;
-
-		if (params.frequencyBlendStrategy) {
-			// Blend factor, between the range [0,1] //
-			const t = linearStep(params.time, params.frequencyBlendStartFrame, params.frequencyBlendEndFrame);
-			
-			params.frequency = do_Blend(
-				  params.frequencyBlendStrategy
-				, t
-				, params.frequencyStart
-				, params.frequencyEnd);
-
-			// Adjust phase to match the instantaneous phase at the time of frequency change //
-			params.phase = params.cumulativePhase - 2 * M_PI * params.frequency / params.TIME * (params.time + params.deltaTime);
-		}
-
-		if (params.amplitudeBlendStrategy) {
-			// Blend factor, between the range [0,1] //
-			const t = linearStep(params.time, params.amplitudeBlendStartFrame, params.amplitudeBlendEndFrame);
-			
-			params.amplitude = do_Blend(
-					  params.amplitudeBlendStrategy
-					, t
-					, params.amplitudeStart
-					, params.amplitudeEnd);
-		}
 
 		// Generate the signal with interpolated parameters //
 		const result = params.amplitude * Math.sin(2 * Math.PI * params.frequency / params.TIME * params.time + params.phase);
@@ -1364,11 +1316,14 @@ class FWaveform extends Object {
 	@param timeStep_constDouble: The time-step (t) at which the oscillator is to be evaluated.
 	@param theta_constDouble: The phase of the oscillator signal.
 	@return double ( The oscillator signal at time-step t).*/
-	sine(amplitude_constDouble
-		, frequencyHz_double
-		, timeStep_constDouble
-		, theta_constDouble) {
-		return amplitude_constDouble * Math.sin(2 * PI_HiRes * frequencyHz_double * timeStep_constDouble + theta_constDouble);
+	sine(params) {
+
+		const amplitude_constDouble = params.amplitude;
+		const frequencyHz_double = params.frequency;
+		const timeStep_constDouble = params.time;
+		const theta_constDouble = params.phase;
+
+		return amplitude_constDouble * Math.sin(2 * PI_HiRes * frequencyHz_double / params.TIME * timeStep_constDouble + theta_constDouble);
 	}
 
 	/**
@@ -1379,12 +1334,27 @@ class FWaveform extends Object {
 	@param theta_constDouble: The phase of the oscillator signal.
 	@param quarterPeriod_constDouble: The quarter-period of the oscillator signal.
 	@return double ( The oscillator signal at time-step t).*/
-	quarterSine(amplitude_constDouble
-		, frequencyHz_double
-		, timeStep_constDouble
-		, theta_constDouble) {
+	quarterSine(params) {
+		
+		const amplitude_constDouble = params.amplitude;
+		const frequencyHz_double = params.frequency
+		const timeStep_constDouble = params.time;
+		const theta_constDouble = params.phase;
+
 		const quarterPeriod_constDouble = 1 / (4 * frequencyHz_double);
-		return amplitude_constDouble * Math.sin(2 * PI_HiRes * Math.fmod(Math.abs(timeStep_constDouble), quarterPeriod_constDouble) + theta_constDouble);
+
+		const result = amplitude_constDouble 
+			* Math.sin(
+				  2 
+				* PI_HiRes 
+				* Math.fmod(Math.abs(
+					  frequencyHz_double 
+					/ params.TIME 
+					* timeStep_constDouble)
+					, quarterPeriod_constDouble) 
+					+ theta_constDouble);
+		
+		return result;
 	}
 
 	/**
@@ -1394,35 +1364,39 @@ class FWaveform extends Object {
 	@param timeStep_constDouble: The time-step (t) at which the oscillator is to be evaluated.
 	@param theta_constDouble: The phase of the oscillator signal.
 	@return double (The oscillator signal at time-step, t). */
-	halfSine(amplitude_constDouble
-		, frequencyHz_double
-		, timeStep_constDouble
-		, theta_constDouble) {
+	halfSine(params) {
+		
+		const amplitude_constDouble = params.amplitude;
+		const frequencyHz_double = params.frequency
+		const timeStep_constDouble = params.time;
+		const theta_constDouble = params.phase;
+
 		const halfPeriod_constDouble = 1 / (2 * frequencyHz_double);
-		return amplitude_constDouble * Math.sin(2 * PI_HiRes * Math.fmod(Math.abs(timeStep_constDouble), halfPeriod_constDouble) + theta_constDouble);
+		
+		const result = amplitude_constDouble 
+			* Math.sin(
+				  2 
+				* PI_HiRes 
+				* Math.fmod(Math.abs(
+					  frequencyHz_double 
+					/ params.TIME 
+					* timeStep_constDouble)
+					, halfPeriod_constDouble) 
+					+ theta_constDouble);
+
+		return result;
 	}
-
-	/**
-	@brief Generate a white (Gaussian) noise signal.
-	@param amplitude_constDouble
-	@return double * /
-	double whiteGaussianNoise(amplitude_constDouble) {
-		static std::mt19937 generator; // Random number generator
-		std::normal_distribution<double> distribution(0.0, amplitude_constDouble); // Normal distribution with mean 0 and standard deviation amplitude
-
-		return distribution(generator);
-	}*/
 	
 	/**
-	 * @brief  Generates a sawtooth signal.
-	 * @param {*} currentTime  The current time in milliseconds
-	 * @param {*} min  The minimum value of the sawtooth wave
-	 * @param {*} max  The maximum value of the sawtooth wave
-	 * @param {*} period  The period of the sawtooth wave
-	 * @param {*} indirection  The indirection of the sawtooth wave ('forwards' or 'backwards')
-	 * @returns  The value of the sawtooth wave at the current time
-	 * 
-	 *  // Example usage
+	@brief  Generates a sawtooth signal.
+	@param {*} currentTime  The current time in milliseconds
+	@param {*} min  The minimum value of the sawtooth wave
+	@param {*} max  The maximum value of the sawtooth wave
+	@param {*} period  The period of the sawtooth wave
+	@param {*} indirection  The indirection of the sawtooth wave ('forwards' or 'backwards')
+	@returns  The value of the sawtooth wave at the current time
+	* 
+	*  	// Example usage
 		const now = performance.now(); // Get current time in milliseconds
 		const signalValue = generateSawtooth(now, 0, 1, 2000); // 2 second period
 		console.log(signalValue);  */
@@ -1446,7 +1420,10 @@ class FWaveform extends Object {
 	@brief  Generates white Gaussian noise.
 	@param {number} amplitude_constDouble - Standard deviation of the normal distribution.
 	@returns {number} A random number following a Gaussian distribution.*/
-	whiteGaussianNoise(amplitude_constDouble) {
+	whiteGaussianNoise(params) {
+
+		const amplitude_constDouble = params.amplitude;
+
 		const epsilon = 0.0001; //1e-10; // A small positive constant to prevent u or v from being zero
 
 		let u = Math.random();
@@ -1463,87 +1440,74 @@ class FWaveform extends Object {
 		return z * amplitude_constDouble;
 	}
 
-	/**
-	 * @brief Generates a quasi periodic (pink) noise signal.
-	 * @param {*} duration  The duration of the noise signal in seconds
-	 * @param {*} sampleRate  The sample rate of the noise signal in Hz
-	 * @returns  The generated noise signal */
-	quasiPeriodicNoise(duration, sampleRate) {
-		const basePeriod = 0.01;		  // Average period in seconds
-		const periodVariation = 0.1;	  // Degree of irregularity (0-1) 
-		const pulseWidth = 0.2;		   // Pulse width relative to period (0-1)
-		const filterCutoff = 800;		 // Low-pass filter cutoff frequency (Hz)
+    static basePeriod = 0.01;             // Average period in seconds
+    static periodVariation = 0.1;         // Degree of irregularity (0-1)
+    static pulseWidth = 0.2;              // Pulse width relative to period (0-1)
+    static filterCutoff = 800;            // Low-pass filter cutoff frequency (Hz)
+    static quasiPeriodicTime = 0;         // Current time in seconds
+    static prevNoiseValue = 0;            // For smooth transitions
+    static nextPeriodChangeTime = 0;      // Time for the next period change
+    static currentPeriod = FWaveform.basePeriod * (1 + FWaveform.periodVariation * (2 * Math.random() - 1)); // Initialize the period
 
-		const output = new Float32Array(duration * sampleRate);
-		let time = 0;
-		let prevNoiseValue = 0; // For smooth transitions
+    /**
+    @brief Generates the next value of quasi periodic (pink) noise signal.
+	@details Generates the next value of quasi periodic (pink) noise signal.
+    @param {*} sampleRate The sample rate of the noise signal in Hz
+    @returns The next value in the generated noise signal */
+    static quasiPeriodicNoise(params) {
 
-		for (let i = 0; i < output.length; i++) {
-		  const period = basePeriod * (1 + periodVariation * (2 * Math.random() - 1));
+		const sampleRate = params.sampleRate;
 
-		  if (time % period < pulseWidth * period) {
-			let noiseValue = 2 * Math.random() - 1;
+        if (FWaveform.quasiPeriodicTime >= FWaveform.nextPeriodChangeTime) {
+            FWaveform.currentPeriod = FWaveform.basePeriod * (1 + FWaveform.periodVariation * (2 * Math.random() - 1));
 
-			// Simple low-pass filtering
-			noiseValue = (noiseValue + prevNoiseValue) * 0.5; 
-			prevNoiseValue = noiseValue;
+            FWaveform.nextPeriodChangeTime += FWaveform.currentPeriod;
+        }
 
-			output[i] = noiseValue; 
-		  } else {
-			output[i] = 0;
-		  }
+        let output;
+        if (FWaveform.quasiPeriodicTime % FWaveform.currentPeriod < FWaveform.pulseWidth * FWaveform.currentPeriod) {
+            let noiseValue = 2 * Math.random() - 1;
 
-		  time += 1 / sampleRate;
-		}
+            // Simple low-pass filtering
+            noiseValue = (noiseValue + FWaveform.prevNoiseValue) * 0.5;
 
-		return output;
-	  }
+            FWaveform.prevNoiseValue = noiseValue;
+
+            output = noiseValue;
+        } else {
+            output = 0;
+        }
+
+        FWaveform.quasiPeriodicTime += 1 / sampleRate;
+
+        return output;
+
+    }
 
 	static brownNoiseValue_double = 0;
 	static lastBrownNoiseValue_double = 0;
 	static brownNoiseIncrement_double = 0;
-	static brownNoiseDecay_double= 0;
+	static brownNoiseDecay_double = 0;
+
 	/**
-	@brief Generate a brown noise signal.
+	@brief Generate a brownian noise signal.
 	@param amplitude_constDouble: The amplitude of the oscillator signal.
 	@param frequencyHz_double: The frequency of the oscillator signal.
-	@param timeStep_constDouble: The time-step (t) at which the oscillator is to be evaluated.
 	@return double */
-	brownNoise(amplitude_constDouble
-		, frequencyHz_double
-		, timeStep_constDouble) {
+	brownNoise(params) {
+
+		const amplitude_constDouble = params.amplitude;
+		const frequencyHz_double = params.frequency;
 
 		if (FWaveform.brownNoiseIncrement_double == 0.0) {
 			FWaveform.brownNoiseIncrement_double = 1.0 / (frequencyHz_double * 0.1);
 			FWaveform.brownNoiseDecay_double = Math.exp(-1.0 / (frequencyHz_double * 0.1));
 		}
 
-		FWaveform.brownNoiseValue_double = (FWaveform.brownNoiseValue_double + FWaveform.brownNoiseIncrement_double * (2.0 * (Math.random() / this.RAND_MAX) - 1.0)) * FWaveform.brownNoiseDecay_double;
+		FWaveform.brownNoiseValue_double = (FWaveform.brownNoiseValue_double + FWaveform.brownNoiseIncrement_double * (2.0 * (Math.random() / FWaveform.RAND_MAX) - 1.0)) * FWaveform.brownNoiseDecay_double;
+		
 		return amplitude_constDouble * (FWaveform.brownNoiseValue_double - FWaveform.lastBrownNoiseValue_double);
 	};
-
-	/**
-	@brief Generate a pink noise signal.
-	@param amplitude_constDouble: The amplitude of the oscillator signal.
-	@param frequencyHz_double: The frequency of the oscillator signal.
-	@param timeStep_constDouble: The time-step (t) at which the oscillator is to be evaluated.
-	@return double * /
-	pinkNoise(amplitude_constDouble
-		, frequencyHz_double
-		, timeStep_constDouble) {
-		static double pinkNoiseValue_double {};
-		static double lastPinkNoiseValue_double {};
-		static double pinkNoiseIncrement_double {};
-		static double pinkNoiseDecay_double {};
-
-		if (pinkNoiseIncrement_double == 0.0) {
-			pinkNoiseIncrement_double = 1.0 / (frequencyHz_double * 0.1);
-			pinkNoiseDecay_double = Math.exp(-1.0 / (frequencyHz_double * 0.1));
-		}
-
-		pinkNoiseValue_double = (pinkNoiseValue_double + pinkNoiseIncrement_double * (2.0 * ((double)rand() / (double)RAND_MAX) - 1.0)) * pinkNoiseDecay_double;
-		return amplitude_constDouble * (pinkNoiseValue_double - lastPinkNoiseValue_double);
-	}*/
 
 	static pinkNoiseValue = 0;
 	static lastPinkNoiseValue = 0;
@@ -1555,9 +1519,12 @@ class FWaveform extends Object {
 	@details Generates pink noise.
 	@param {number} amplitude - The amplitude of the oscillator signal.
 	@param {number} frequencyHz - The frequency of the oscillator signal in Hertz.
-	@param {number} nextFrame - The time-step at which the oscillator is to be evaluated.
 	@return {number} The generated pink noise value.*/
-	pinkNoise(amplitude, frequencyHz) {
+	pinkNoise(params) {
+
+		const amplitude = params.amplitude;
+		const frequencyHz = params.frequency;
+
 		if (FWaveform.pinkNoiseIncrement === 0) {
 			FWaveform.pinkNoiseIncrement = 1.0 / (frequencyHz * 0.1);
 			FWaveform.pinkNoiseDecay = Math.exp(-1.0 / (frequencyHz * 0.1));
@@ -1567,6 +1534,7 @@ class FWaveform extends Object {
 		const randomFactor = 2.0 * Math.random() - 1.0;
 
 		FWaveform.pinkNoiseValue = (FWaveform.pinkNoiseValue + FWaveform.pinkNoiseIncrement * randomFactor) * FWaveform.pinkNoiseDecay;
+
 		const retPinkNoiseValue = amplitude * (FWaveform.pinkNoiseValue - FWaveform.lastPinkNoiseValue);
 
 		FWaveform.lastPinkNoiseValue = FWaveform.pinkNoiseValue;
@@ -1585,28 +1553,20 @@ class FWaveform extends Object {
 	@param frequencyHz_double: The frequency of the oscillator signal.
 	@param timeStep_constDouble: The time-step (t) at which the oscillator is to be evaluated.
 	@return double */
-	blueNoise(amplitude_constDouble
-		, frequencyHz_double
-		, timeStep_constDouble) {
+	blueNoise(params) {
+		
+		const amplitude_constDouble = params.amplitude;
+		const frequencyHz_double = params.frequency;
+		const timeStep_constDouble = params.time;
 
 		if (FWaveform.blueNoiseIncrement_double == 0.0) {
 			FWaveform.blueNoiseIncrement_double = 1.0 / (frequencyHz_double * 0.1);
 			FWaveform.blueNoiseDecay_double = Math.exp(-1.0 / (frequencyHz_double * 0.1));
 		}
 
-		FWaveform.blueNoiseValue_double = (FWaveform.blueNoiseValue_double + FWaveform.blueNoiseIncrement_double * (2.0 * (Math.random() / RAND_MAX) - 1.0)) * FWaveform.blueNoiseDecay_double;
+		FWaveform.blueNoiseValue_double = (FWaveform.blueNoiseValue_double + FWaveform.blueNoiseIncrement_double * (2.0 * (Math.random() / FWaveform.RAND_MAX) - 1.0)) * FWaveform.blueNoiseDecay_double;
 		return amplitude_constDouble * (FWaveform.blueNoiseValue_double - FWaveform.lastBlueNoiseValue_double);
 	}
-
-	/**
-	@brief Generate a purple (violet) noise signal.
-	@return double * /
-	static purpleVioletNoise() {
-		double newWhite = dist(eng);  // Generate new white noise sample
-		double violet = newWhite - lastWhite; // Differentiate to get violet noise
-		lastWhite = newWhite; // Update the last white noise sample
-		return violet;
-	}*/
 
 	static lastWhite = 0;
 
@@ -1916,6 +1876,7 @@ function generateComplexSignal(
 		// time characteristics //
 		params.TIME = TIME; // END // 
 		params.deltaTime = 1; // ie. 1 frame per time increment //
+		params.sampleRate = hz_pcm_encoding;
 		// amplitude lerp targets //
 		params.amplitudeBlendStrategy = shape_oscillatorParams.amplitude_as_bezierCurve_flag
 		? BLEND_STRATEGY.QUARTIC
@@ -1969,10 +1930,45 @@ function generateComplexSignal(
 
 				const hz_stepRatio = linearStep(t, hz_start, hz_end);
 				const db_stepRatio = linearStep(t, db_start, db_end);
+
+				/**
+				
+				NOTE: (For Sinusoidals)
+
+				Adjusting the phase in your algorithm to maintain smoothness, 
+				especially during frequency transitions, requires a careful approach. 
+				The goal is to ensure that when the frequency changes, 
+				the phase does not introduce discontinuities or abrupt changes in the waveform. 
+				Here's an approach to adjust the phase dynamically to accommodate changes 
+				in frequency smoothly:
+				
+				1. Track the cumulative phase of the signal over time.
+				
+				This phase needs to be updated every time you generate a sample.
+				
+				2. Adjust Phase During Frequency Transition
+		
+				When you change the frequency, adjust the starting phase 
+				of the new frequency to match the instantaneous phase of the ongoing signal. 
+				This helps in avoiding phase discontinuities.
+				
+				**/
+
+				if (params.frequencyBlendStrategy) {
+					// 1. Track the cumulative phase of the signal over time. //
+					const oldFrequency = params.frequency;
+					
+					params.cumulativePhase += 2 * Math.PI * oldFrequency * params.deltaTime / params.TIME;
+				}
 				
 				params.frequency = const_inv_hz_pcm_encoding * me.frequency_as_bezierCurve_flag 
 				? smoothInterpolationMethod(hz_stepRatio, hz_start, hz_end)
 				: defaultInterpolationMethod(hz_stepRatio, hz_start, hz_end) ;
+
+				if (params.frequencyBlendStrategy) {
+					// 2. Adjust phase to match the instantaneous phase at the time of frequency change //
+					params.phase = params.cumulativePhase - 2 * M_PI * params.frequency / params.TIME * (params.time + params.deltaTime);
+				}
 				
 				params.amplitude = me.amplitude_as_bezierCurve_flag 
 				? smoothInterpolationMethod(hz_stepRatio, db_start, db_end)
@@ -2005,9 +2001,8 @@ function generateComplexSignal(
 
 	let channelDataRight = [...channelDataLeft];
 
-	// shift LEFT/RIGHT channel alignment by 1 sample //
+	// shift LEFT/RIGHT channel alignment by 1 sample (stereo) //
 	channelDataLeft.unshift(0);
-	// perform channel length matching //
 	channelDataRight.push(0);
 
 	return { channelDataLeft, channelDataRight };
@@ -2346,6 +2341,7 @@ AudioBTN.addEventListener('click', function() {
 	// Generate the sine wave data
 	const I = channelDataLeft.length;
 	const maxInt24 = Math.pow(2, bitsPerSample - 1) - 1; // 2^23 - 1 = 8_388_607; preserve the sign bit
+
 	for (let i = 0; i < I; ++i) {
 		const time = i / sampleRate; // returns a value between 0 and 1
 		const value = Math.sin(2 * Math.PI * frequency * time) * amplitude;
