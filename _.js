@@ -1922,6 +1922,8 @@ function generateComplexSignal(
 
 			while(t < FRAME_IDX){
 
+				params.time = t;
+				
 				const hz_stepRatio = linearStep(t, hz_start, hz_end);
 				const db_stepRatio = linearStep(t, db_start, db_end);
 
@@ -1961,7 +1963,7 @@ function generateComplexSignal(
 
 				if (params.isPhaseSensitive) {
 					// 2. Adjust phase to match the instantaneous phase at the time of frequency change //
-					params.phase = params.cumulativePhase - 2 * M_PI * params.frequency / params.TIME * (params.time + params.deltaTime);
+					params.phase = params.cumulativePhase - 2 * Math.PI * params.frequency / params.TIME * (params.time + params.deltaTime);
 				}
 				
 				params.amplitude = me.amplitude_as_bezierCurve_flag 
@@ -1975,6 +1977,7 @@ function generateComplexSignal(
 						channelDataLeft.push(0);
 
 					channelDataLeft[t] += outShape; // Careful not to saturate the dynamic range //
+
 					channelDataLeft[t] = clamp(
 						  channelDataLeft[t]
 						,-amplitude_pcm_encoding_dynamic_range
@@ -1995,7 +1998,7 @@ function generateComplexSignal(
 
 	let channelDataRight = [...channelDataLeft];
 
-	// shift LEFT/RIGHT channel alignment by 1 sample (stereo) //
+	// offset LEFT/RIGHT channel alignment by 1 sample //
 	channelDataLeft.unshift(0);
 	channelDataRight.push(0);
 
@@ -2616,20 +2619,19 @@ function closeOverlay() {
 }
 
 /**
-	// Example Usage for linearStep ratio //
-	// smoothly interpolated value between 0 and 1. //
+Example Usage for linearStep ratio
+smoothly interpolated value between 0 and 1. 
 
-	value = linearStep(x, min, max);
+	value = linearStep(x, start, end);
 */
 
 /**
- * Calculates a smooth transition between 0 and 1 using a linear interpolation.
- * This function can be used to apply linear effects to your values.
- * 
- * @brief Usage example for linear
+ * @brief Calculates a smooth transition between 0 and 1 using a linear interpolation. 
+ * @details Calculates a smooth transition between 0 and 1 using a linear interpolation. 
+ * This function can be used to apply linear effects to your values. 
  * @param {number} x - The input value for which to calculate the smoothstep, typically time or a normalized parameter.
- * @param {number} min - The lower bound of the input range.
- * @param {number} max - The upper bound of the input range.
+ * @param {number} start - The lower bound of the input range.
+ * @param {number} end - The upper bound of the input range.
  * @returns {number} - The smoothly interpolated stepRatio between 0 and 1. */
 function linearStep(x, min, max) {
 	if (x <= min) return 0;
@@ -2639,7 +2641,7 @@ function linearStep(x, min, max) {
 }
 
 /**
- * Performs quartic ease-in interpolation.
+ * @details Performs quartic ease-in interpolation.
  * Starts with a slow acceleration and then speeds up.
  * @param {number} t - The interpolation factor, between 0.0 (start) and 1.0 (end).
  * @returns {number} The interpolated value at the factor t, assuming start value is 0 and end value is 1. */
@@ -2676,7 +2678,8 @@ function quarticEaseOut(t) {
 */
 
 /**
- *  Performa a Linear Interpolation between two values.
+ * @brief Performa a Linear Interpolation between two values.
+ * @details Performa a Linear Interpolation between two values.
  * @param {*} t  - The interpolation factor, ranging from 0.0 (start) to 1.0 (end).
  * @param {*} start  - The starting value of the parameter to interpolate.
  * @param {*} end  - The ending value of the parameter to interpolate.
@@ -2692,13 +2695,13 @@ function LERP(
 }
 
 /**
- * Combines quartic ease-in and ease-out into a single function.
- * Accelerates from start and decelerates to stop.
- * @param {number} startValue - The starting value of the parameter to interpolate.
- * @param {number} endValue - The ending value of the parameter to interpolate.
+ * @brief Accelerates from start and decelerates to stop.
+ * @details Combines quartic ease-in and ease-out into a single function.
  * @param {number} t - The interpolation factor, between 0.0 (start) and 1.0 (end).
+ * @param {number} start - The starting value of the parameter to interpolate.
+ * @param {number} end - The ending value of the parameter to interpolate.
  * @returns {number} The interpolated value. */
-function quarticEaseInOut(startValue, endValue, t) {
+function quarticEaseInOut(t, startValue, endValue) {
 	t = Math.max(0, Math.min(1, t)); // Clamp t to the range [0, 1] //
 	if (t < 0.5) {
 		return startValue + (endValue - startValue) * 8 * t * t * t * t;
