@@ -1012,7 +1012,8 @@ AddFramesBTN.addEventListener('click', function() {
 
 		const nextOSCINterval_frame = lastOSCInterval.frame + dx;
 		const nextOSCInterval_time_step = lastOSCInterval.time_step;
-		formant.push(new OSC_INTERVAL({ amplitude: g_default_amplitude
+		formant.push(new OSC_INTERVAL({ 
+			  amplitude: g_default_amplitude
 			, frequency: g_default_frequency
 			, frame: nextOSCINterval_frame
 			, time_step: nextOSCInterval_time_step }) );
@@ -1298,13 +1299,22 @@ class FWaveform extends Object {
 
 	/**
 	@brief Generates a Sine wave.
-	@param params: The essential parameters for the input signal
+	@param amplitude_constDouble: The amplitude of the oscillator signal.
+	@param frequencyHz_double: The frequency of the oscillator signal.
+	@param timeStep_constDouble: The time-step (t) at which the oscillator is to be evaluated.
+	@param theta_constDouble: The phase of the oscillator signal.
 	@return double ( The oscillator signal at time-step t).*/
 	SIN(params)
 	{
 
+		const amplitude_constDouble = params.amplitude;
+		const frequencyHz_double = params.frequency;
+		const timeStep_constDouble = params.time;
+		const theta_constDouble = params.phase;
+		const sampleRate = params.sampleRate; // already factored into frequency //
+
 		// Generate the signal with interpolated parameters //
-		const result = params.amplitude * Math.sin(2 * Math.PI * params.frequency / params.TIME * params.time + params.phase);
+		const result = amplitude_constDouble * Math.sin(2 * Math.PI * frequencyHz_double / params.TIME * timeStep_constDouble + theta_constDouble);
 
 		return result;
 	}
@@ -1322,8 +1332,11 @@ class FWaveform extends Object {
 		const frequencyHz_double = params.frequency;
 		const timeStep_constDouble = params.time;
 		const theta_constDouble = params.phase;
+		const sampleRate = params.sampleRate; // already factored into frequency //
 
-		return amplitude_constDouble * Math.sin(2 * PI_HiRes * frequencyHz_double / params.TIME * timeStep_constDouble + theta_constDouble);
+		const result = amplitude_constDouble * Math.sin(2 * PI_HiRes * frequencyHz_double / params.TIME * timeStep_constDouble + theta_constDouble);
+
+		return result;
 	}
 
 	/**
@@ -1340,6 +1353,7 @@ class FWaveform extends Object {
 		const frequencyHz_double = params.frequency
 		const timeStep_constDouble = params.time;
 		const theta_constDouble = params.phase;
+		const sampleRate = params.sampleRate; // already factored into frequency //
 
 		const quarterPeriod_constDouble = 1 / (4 * frequencyHz_double);
 
@@ -1365,6 +1379,7 @@ class FWaveform extends Object {
 		const frequencyHz_double = params.frequency
 		const timeStep_constDouble = params.time;
 		const theta_constDouble = params.phase;
+		const sampleRate = params.sampleRate; // already factored into frequency //
 
 		const halfPeriod_constDouble = 1 / (2 * frequencyHz_double);
 		
@@ -1379,9 +1394,9 @@ class FWaveform extends Object {
 	
 	/**
 	@brief  Generates a sawtooth signal.
-	@param {*} currentTime  The current time in milliseconds
-	@param {*} min  The minimum value of the sawtooth wave
-	@param {*} max  The maximum value of the sawtooth wave
+	@param {*} t  The current time in milliseconds
+	@param {*} start  The minimum value of the sawtooth wave
+	@param {*} end  The maximum value of the sawtooth wave
 	@param {*} period  The period of the sawtooth wave
 	@param {*} indirection  The indirection of the sawtooth wave ('forwards' or 'backwards')
 	@returns  The value of the sawtooth wave at the current time
@@ -1391,14 +1406,17 @@ class FWaveform extends Object {
 		const signalValue = generateSawtooth(now, 0, 1, 2000); // 2 second period
 		console.log(signalValue);  */
 	sawtooth(
-		  currentTime
-		, min
-		, max
-		, period
+		  params
 		, indirection = 'forwards') {
-		const normalizedTime = (currentTime % period) / period; // Keep time within a period
+		
+		const t = params.time;
+		const min = params.amplitudeStart;
+		const max = params.amplitudeEnd;
+		const period = 1/params.frequency;
+		
+		const normalizedTime = (t % period) / period; // Keep time within a period //
 
-		// Linear interpolation for rising edge
+		// Linear interpolation for rising edge //
 		const value = indirection === 'forwards'
 			? min + (max - min) * normalizedTime
 			: max - (max - min) * normalizedTime; 
@@ -1425,7 +1443,7 @@ class FWaveform extends Object {
 		v = (v === 0) ? epsilon : v;
 
 		// Performing the Box-Muller transform
-		let z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+		const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 
 		return z * amplitude_constDouble;
 	}
@@ -2736,10 +2754,10 @@ function quarticEaseInOut(t, startValue, endValue) {
  * Performs cubic Hermite interpolation between two values bound within an interval.
  * 
  * @param {number} t - The interpolation factor, ranging from 0.0 (start) to 1.0 (end).
- * @param {number} p0 - The starting value of the interpolation (at t=0).
- * @param {number} p1 - The ending value of the interpolation (at t=1).
- * @param {number} m0 - The tangent (slope) at the starting point.
- * @param {number} m1 - The tangent (slope) at the ending point.
+ * @param {number} start - The starting value of the interpolation (at t=0).
+ * @param {number} end - The ending value of the interpolation (at t=1).
+ * @param {number} m0 - The tangent secant (slope) at the starting point.
+ * @param {number} m1 - The tangent secant (slope) at the ending point.
  * @returns {number} - The interpolated value. */
 function cubicHermite(t, p0, p1, m0, m1) {
 	const t2 = t * t;
