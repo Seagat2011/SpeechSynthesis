@@ -1343,16 +1343,11 @@ class FWaveform extends Object {
 
 		const quarterPeriod_constDouble = 1 / (4 * frequencyHz_double);
 
-		const result = amplitude_constDouble 
-			* Math.sin(
-				  2 
-				* PI_HiRes 
-				* Math.fmod(Math.abs(
-					  frequencyHz_double 
-					/ params.TIME 
-					* timeStep_constDouble)
-					, quarterPeriod_constDouble) 
-					+ theta_constDouble);
+		const result = amplitude_constDouble * Math.sin(
+			2 * PI_HiRes * Math.fmod(
+			Math.abs(frequencyHz_double / params.TIME * timeStep_constDouble)
+			, quarterPeriod_constDouble) 
+			+ theta_constDouble);
 		
 		return result;
 	}
@@ -1373,16 +1368,11 @@ class FWaveform extends Object {
 
 		const halfPeriod_constDouble = 1 / (2 * frequencyHz_double);
 		
-		const result = amplitude_constDouble 
-			* Math.sin(
-				  2 
-				* PI_HiRes 
-				* Math.fmod(Math.abs(
-					  frequencyHz_double 
-					/ params.TIME 
-					* timeStep_constDouble)
-					, halfPeriod_constDouble) 
-					+ theta_constDouble);
+		const result = amplitude_constDouble * Math.sin(
+			2 * PI_HiRes * Math.fmod(
+			Math.abs(frequencyHz_double / params.TIME * timeStep_constDouble)
+			, halfPeriod_constDouble) 
+			+ theta_constDouble);
 
 		return result;
 	}
@@ -1797,21 +1787,25 @@ function do_Blend(
 
 function assignWaveShapeFuncs(fmt, wfm){
 	for (let _fmt_ of fmt) {
-		switch(_fmt_.shape) {			
+		switch(_fmt_.shape) {
+			case 'Half-Sine':
+			case 'Quarter-Sine':
 			case 'Sine': 
 				_fmt_.shape_func = wfm.SIN;
+				_fmt_.isPhaseSensitive = true;
 				break;
 			case 'Cosine':
 				_fmt_.shape_func = wfm.cos;
+				_fmt_.isPhaseSensitive = true;
 				break;
 			case 'Square':
 				_fmt_.shape_func = wfm.square;
 				break;
 			case 'F. Sawtooth':
-				_fmt_.shape_func = wfm.forwardSaw;
+				_fmt_.shape_func = function(params){ return wfm.Saw(params,'forward'); };
 				break;
 			case 'R. Sawtooth':
-				_fmt_.shape_func = wfm.ReverseSaw;
+				_fmt_.shape_func = function(params){ return wfm.Saw(params,'reverse'); };
 				break;
 			case 'Triangle': 
 				_fmt_.shape_func = wfm.Triangle;
@@ -1954,7 +1948,7 @@ function generateComplexSignal(
 				
 				**/
 
-				if (params.frequencyBlendStrategy) {
+				if (params.isPhaseSensitive) {
 					// 1. Track the cumulative phase of the signal over time. //
 					const oldFrequency = params.frequency;
 					
@@ -1965,7 +1959,7 @@ function generateComplexSignal(
 				? smoothInterpolationMethod(hz_stepRatio, hz_start, hz_end)
 				: defaultInterpolationMethod(hz_stepRatio, hz_start, hz_end) ;
 
-				if (params.frequencyBlendStrategy) {
+				if (params.isPhaseSensitive) {
 					// 2. Adjust phase to match the instantaneous phase at the time of frequency change //
 					params.phase = params.cumulativePhase - 2 * M_PI * params.frequency / params.TIME * (params.time + params.deltaTime);
 				}
