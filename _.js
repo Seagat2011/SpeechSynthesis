@@ -1423,6 +1423,71 @@ class FWaveform extends Object {
 
 		return value;
 	}
+	
+	/**
+	@brief  Generates a triangle wave signal.
+	@param {*} t  The current time in milliseconds
+	@param {*} start  The minimum value of the triangle wave
+	@param {*} end  The maximum value of the triangle wave
+	@param {*} period  The period of the triangle wave
+	@returns  The value of the triangle wave at the current time
+	* 
+	*   // Example usage
+		const now = performance.now(); // Get current time in milliseconds
+		const signalValue = generateTriangle(now, 0, 1, 2000); // 2 second period
+		console.log(signalValue);  */
+	triangle(params) {
+	
+		const t = params.time;
+		const min = params.amplitudeStart;
+		const max = params.amplitudeEnd;
+		const period = 1/params.frequency;
+		
+		const normalizedTime = (t % period) / period; // Normalize time within a period
+
+		// Calculate slope for linear interpolation based on wave direction
+		const slope = (max - min) * 4 / period;
+
+		let value;
+
+		if (normalizedTime < 0.5) {
+			// Falling edge first if indirection is backwards
+			value = max - slope * (t % (period / 2));
+		} else {
+			// Then rising edge
+			value = min + slope * (t % (period / 2));
+		}
+
+		return value;
+	}
+
+	/**
+	@brief  Generates a square wave signal.
+	@param {*} t  The current time in milliseconds
+	@param {*} start  The minimum value of the square wave
+	@param {*} end  The maximum value of the square wave
+	@param {*} period  The period of the square wave
+	@returns  The value of the square wave at the current time
+	* 
+	*   // Example usage
+		const now = performance.now(); // Get current time in milliseconds
+		const signalValue = generateSquare(now, 0, 1, 2000); // 2 second period
+		console.log(signalValue);  */
+	square(params) {
+	
+		const t = params.time;
+		const min = params.amplitudeStart;
+		const max = params.amplitudeEnd;
+		const period = 1/params.frequency;
+		
+		const normalizedTime = (t % period) / period; // Normalize time within a period
+			
+		const value = normalizedTime >= 0.5 
+		? max // Output max value for the first half and min value for the second half of the period
+		: min; // Reverse the logic for backwards indirection
+
+		return value;
+	}
 
 	/**
 	@brief  Generates white Gaussian noise.
@@ -1467,7 +1532,10 @@ class FWaveform extends Object {
 		const sampleRate = params.sampleRate;
 
         if (FWaveform.quasiPeriodicTime >= FWaveform.nextPeriodChangeTime) {
-            FWaveform.currentPeriod = FWaveform.basePeriod * (1 + FWaveform.periodVariation * (2 * Math.random() - 1));
+            FWaveform.currentPeriod = 
+				FWaveform.basePeriod 
+					* (1 + FWaveform.periodVariation 
+						* (2 * Math.random() - 1));
 
             FWaveform.nextPeriodChangeTime += FWaveform.currentPeriod;
         }
@@ -1512,9 +1580,18 @@ class FWaveform extends Object {
 			FWaveform.brownNoiseDecay_double = Math.exp(-1.0 / (frequencyHz_double * 0.1));
 		}
 
-		FWaveform.brownNoiseValue_double = (FWaveform.brownNoiseValue_double + FWaveform.brownNoiseIncrement_double * (2.0 * (Math.random() / FWaveform.RAND_MAX) - 1.0)) * FWaveform.brownNoiseDecay_double;
+		FWaveform.brownNoiseValue_double = 
+			(FWaveform.brownNoiseValue_double 
+				+ FWaveform.brownNoiseIncrement_double 
+					* (2.0 * (Math.random() / FWaveform.RAND_MAX) - 1.0)) 
+						* FWaveform.brownNoiseDecay_double;
 		
-		return amplitude_constDouble * (FWaveform.brownNoiseValue_double - FWaveform.lastBrownNoiseValue_double);
+		const result = 
+			amplitude_constDouble 
+				* (FWaveform.brownNoiseValue_double 
+					- FWaveform.lastBrownNoiseValue_double);
+
+		return result;
 	};
 
 	static pinkNoiseValue = 0;
@@ -1572,8 +1649,18 @@ class FWaveform extends Object {
 			FWaveform.blueNoiseDecay_double = Math.exp(-1.0 / (frequencyHz_double * 0.1));
 		}
 
-		FWaveform.blueNoiseValue_double = (FWaveform.blueNoiseValue_double + FWaveform.blueNoiseIncrement_double * (2.0 * (Math.random() / FWaveform.RAND_MAX) - 1.0)) * FWaveform.blueNoiseDecay_double;
-		return amplitude_constDouble * (FWaveform.blueNoiseValue_double - FWaveform.lastBlueNoiseValue_double);
+		FWaveform.blueNoiseValue_double = 
+			(FWaveform.blueNoiseValue_double 
+				+ FWaveform.blueNoiseIncrement_double 
+					* (2.0 * (Math.random() / FWaveform.RAND_MAX) - 1.0)) 
+						* FWaveform.blueNoiseDecay_double;
+		
+		const result = 
+			amplitude_constDouble 
+				* (FWaveform.blueNoiseValue_double 
+					- FWaveform.lastBlueNoiseValue_double);
+
+		return result;
 	}
 
 	static lastWhite = 0;
@@ -1653,7 +1740,7 @@ const interpolationUtils = {
 			throw new Error("runtime_error: Not enough inter-frame interpolation\
 			steps for sinusoidal interpolation within the specified oscillator interval: [0, 1]");
 		}
-	},
+	},*/
 
 	/**
 	@brief Calculates the sinusoidal value based on amplitude, frequency, and time.
@@ -1806,8 +1893,9 @@ function do_Blend(
 function assignWaveShapeFuncs(fmt, wfm){
 	for (let _fmt_ of fmt) {
 		switch(_fmt_.shape) {
-			case 'Half-Sine':
-			case 'Quarter-Sine':
+			//case 'Half-Sine':
+			//case 'Quarter-Sine':
+			//case 'quasiPeriodicNoise':
 			case 'Sine': 
 				_fmt_.shape_func = wfm.SIN;
 				_fmt_.isPhaseSensitive = true;
@@ -1820,13 +1908,13 @@ function assignWaveShapeFuncs(fmt, wfm){
 				_fmt_.shape_func = wfm.square;
 				break;
 			case 'F. Sawtooth':
-				_fmt_.shape_func = function(params){ return wfm.Saw(params,'forward'); };
+				_fmt_.shape_func = function(params){ return wfm.sawtooth(params,'forward'); };
 				break;
 			case 'R. Sawtooth':
-				_fmt_.shape_func = function(params){ return wfm.Saw(params,'reverse'); };
+				_fmt_.shape_func = function(params){ return wfm.sawtooth(params,'reverse'); };
 				break;
 			case 'Triangle': 
-				_fmt_.shape_func = wfm.Triangle;
+				_fmt_.shape_func = wfm.triangle;
 				break;
 			case 'Pink Noise':
 				_fmt_.shape_func = wfm.pinkNoise;
