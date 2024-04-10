@@ -1012,7 +1012,7 @@ AddFramesBTN.addEventListener('click', function() {
 
 		const nextOSCINterval_frame = lastOSCInterval.frame + dx;
 		const nextOSCInterval_time_step = lastOSCInterval.time_step;
-		formant.push(new OSC_INTERVAL({ 
+		formant.push(new OSC_INTERVAL({
 			  amplitude: g_default_amplitude
 			, frequency: g_default_frequency
 			, frame: nextOSCINterval_frame
