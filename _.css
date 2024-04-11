@@ -38,7 +38,7 @@ select:hover {
 }
 
 .btn_class {
-    /*width: 107px;*/
+    min-width: 107px;
     color: white;/*#888;*/
     padding: 4px;
     padding-bottom: 5px;
