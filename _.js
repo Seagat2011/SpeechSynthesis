@@ -1142,120 +1142,214 @@ function serializeCustomObject(obj) {
 	return result;
 }
 
-const pcm_encoding_docstring_options = 
-{
-	"0": {
-		"pcm_encoding_docstring": "PCM 16-bit/44 KHz",
-		"bit_depth": 16,
-		"sample_rate": 44.1 },
-	"1": {
-		"pcm_encoding_docstring": "PCM 16-bit/48 KHz",
-		"bit_depth": 16,
-		"sample_rate": 48 },
-	"2": {
-		"pcm_encoding_docstring": "PCM 16-bit/88 KHz",
-		"bit_depth": 16,
-		"sample_rate": 88.2 },
-	"3": {
-		"pcm_encoding_docstring": "PCM 16-bit/96 KHz",
-		"bit_depth": 16,
-		"sample_rate": 96 },
-	"4": {
-		"pcm_encoding_docstring": "PCM 16-bit/192 KHz",
-		"bit_depth": 16,
-		"sample_rate": 192 },
-	"5": {
-		"pcm_encoding_docstring": "PCM 16-bit/384 KHz",
-		"bit_depth": 16,
-		"sample_rate": 384 },
-	"6": {
-		"pcm_encoding_docstring": "PCM 16-bit/768 KHz",
-		"bit_depth": 16,
-		"sample_rate": 768 },
-	"7": {
-		"pcm_encoding_docstring": "PCM 24-bit/44 KHz",
-		"bit_depth": 24,
-		"sample_rate": 44.1 },
-	"8": {
-		"pcm_encoding_docstring": "PCM 24-bit/48 KHz",
-		"bit_depth": 24,
-		"sample_rate": 48 },
+const pcm_encoding_docstring_options = {
+    "0": {
+        "pcm_encoding_docstring": "PCM 16-bit/44 KHz",
+        "bit_depth": 16,
+        "sample_rate": 44.1,
+        "dynamic_range_dBFS": 96.32,
+        "saturation_value_dBFS": -96
+    },
+    "1": {
+        "pcm_encoding_docstring": "PCM 16-bit/48 KHz",
+        "bit_depth": 16,
+        "sample_rate": 48,
+        "dynamic_range_dBFS": 96.32,
+        "saturation_value_dBFS": -96
+    },
+    "2": {
+        "pcm_encoding_docstring": "PCM 16-bit/88 KHz",
+        "bit_depth": 16,
+        "sample_rate": 88.2,
+        "dynamic_range_dBFS": 96.32,
+        "saturation_value_dBFS": -96
+    },
+    "3": {
+        "pcm_encoding_docstring": "PCM 16-bit/96 KHz",
+        "bit_depth": 16,
+        "sample_rate": 96,
+        "dynamic_range_dBFS": 96.32,
+        "saturation_value_dBFS": -96
+    },
+    "4": {
+        "pcm_encoding_docstring": "PCM 16-bit/192 KHz",
+        "bit_depth": 16,
+        "sample_rate": 192,
+        "dynamic_range_dBFS": 96.32,
+        "saturation_value_dBFS": -96
+    },
+    "5": {
+        "pcm_encoding_docstring": "PCM 16-bit/384 KHz",
+        "bit_depth": 16,
+        "sample_rate": 384,
+        "dynamic_range_dBFS": 96.32,
+        "saturation_value_dBFS": -96
+    },
+    "6": {
+        "pcm_encoding_docstring": "PCM 16-bit/768 KHz",
+        "bit_depth": 16,
+        "sample_rate": 768,
+        "dynamic_range_dBFS": 96.32,
+        "saturation_value_dBFS": -96
+    },
+    "7": {
+        "pcm_encoding_docstring": "PCM 24-bit/44 KHz",
+        "bit_depth": 24,
+        "sample_rate": 44.1,
+        "dynamic_range_dBFS": 144.48,
+        "saturation_value_dBFS": -144
+    },
+    "8": {
+        "pcm_encoding_docstring": "PCM 24-bit/48 KHz",
+        "bit_depth": 24,
+        "sample_rate": 48,
+        "dynamic_range_dBFS": 144.48,
+        "saturation_value_dBFS": -144
+    },
 	"9": {
 		"pcm_encoding_docstring": "PCM 24-bit/88 KHz",
 		"bit_depth": 24,
-		"sample_rate": 88.2 },
+		"sample_rate": 88.2,
+        "dynamic_range_dBFS": 144.48,
+        "saturation_value_dBFS": -144 },
 	"10": {
 		"pcm_encoding_docstring": "PCM 24-bit/96 KHz",
 		"bit_depth": 24,
-		"sample_rate": 96 },
+		"sample_rate": 96,
+        "dynamic_range_dBFS": 144.48,
+        "saturation_value_dBFS": -144 },
 	"11": {
 		"pcm_encoding_docstring": "PCM 24-bit/192 KHz",
 		"bit_depth": 24,
-		"sample_rate": 192 },
+		"sample_rate": 192,
+        "dynamic_range_dBFS": 144.48,
+        "saturation_value_dBFS": -144 },
 	"12": {
 		"pcm_encoding_docstring": "PCM 24-bit/384 KHz",
 		"bit_depth": 24,
-		"sample_rate": 384 },
+		"sample_rate": 384,
+        "dynamic_range_dBFS": 144.48,
+        "saturation_value_dBFS": -144 },
 	"13": {
 		"pcm_encoding_docstring": "PCM 24-bit/768 KHz",
 		"bit_depth": 24,
-		"sample_rate": 768 },
+		"sample_rate": 768,
+        "dynamic_range_dBFS": 144.48,
+        "saturation_value_dBFS": -144 },
 	"14": {
 		"pcm_encoding_docstring": "PCM 32-bit/44 KHz",
 		"bit_depth": 32,
-		"sample_rate": 44.1 },
+		"sample_rate": 44.1,
+        "dynamic_range_dBFS": 192.64,
+        "saturation_value_dBFS": -193 },
 	"15": {
 		"pcm_encoding_docstring": "PCM 32-bit/48 KHz",
 		"bit_depth": 32,
-		"sample_rate": 48 },
+		"sample_rate": 48,
+        "dynamic_range_dBFS": 192.64,
+        "saturation_value_dBFS": -193 },
 	"16": {
 		"pcm_encoding_docstring": "PCM 32-bit/88 KHz",
 		"bit_depth": 32,
-		"sample_rate": 88.2 },
+		"sample_rate": 88.2,
+        "dynamic_range_dBFS": 192.64,
+        "saturation_value_dBFS": -193 },
 	"17": {
 		"pcm_encoding_docstring": "PCM 32-bit/96 KHz",
 		"bit_depth": 32,
-		"sample_rate": 96 },
+		"sample_rate": 96,
+        "dynamic_range_dBFS": 192.64,
+        "saturation_value_dBFS": -193 },
 	"18": {
 		"pcm_encoding_docstring": "PCM 32-bit/192 KHz",
 		"bit_depth": 32,
-		"sample_rate": 192 },
+		"sample_rate": 192,
+        "dynamic_range_dBFS": 192.64,
+        "saturation_value_dBFS": -193 },
 	"19": {
 		"pcm_encoding_docstring": "PCM 32-bit/384 KHz",
 		"bit_depth": 32,
-		"sample_rate": 384 },
+		"sample_rate": 384,
+        "dynamic_range_dBFS": 192.64,
+        "saturation_value_dBFS": -193 },
 	"20": {
 		"pcm_encoding_docstring": "PCM 32-bit/768 KHz",
 		"bit_depth": 32,
-		"sample_rate": 768 },
+		"sample_rate": 768,
+        "dynamic_range_dBFS": 192.64,
+        "saturation_value_dBFS": -193 },
 	"21": {
 		"pcm_encoding_docstring": "PCM 64-bit/44 KHz",
 		"bit_depth": 64,
-		"sample_rate": 44.1 },
+		"sample_rate": 44.1,
+		"dynamic_range_dBFS": 385.28,
+		"saturation_value_dBFS": -385 },
 	"22": {
 		"pcm_encoding_docstring": "PCM 64-bit/48 KHz",
 		"bit_depth": 64,
-		"sample_rate": 48 },
+		"sample_rate": 48,
+		"dynamic_range_dBFS": 385.28,
+		"saturation_value_dBFS": -385 },
 	"23": {
-		"pcm_encoding_docstring": "PCM 64-bit/88 KHz",
-		"bit_depth": 64,
-		"sample_rate": 88.2 },
+			"pcm_encoding_docstring": "PCM 64-bit/88 KHz",
+			"bit_depth": 64,
+			"sample_rate": 88.2,
+			"dynamic_range_dBFS": 385.28,
+			"saturation_value_dBFS": -385 },
 	"24": {
 		"pcm_encoding_docstring": "PCM 64-bit/96 KHz",
 		"bit_depth": 64,
-		"sample_rate": 96 },
+		"sample_rate": 96,
+		"dynamic_range_dBFS": 385.28,
+		"saturation_value_dBFS": -385 },
 	"25": {
 		"pcm_encoding_docstring": "PCM 64-bit/192 KHz",
 		"bit_depth": 64,
-		"sample_rate": 192 },
+		"sample_rate": 192,
+		"dynamic_range_dBFS": 385.28,
+		"saturation_value_dBFS": -385 },
 	"26": {
 		"pcm_encoding_docstring": "PCM 64-bit/384 KHz",
 		"bit_depth": 64,
-		"sample_rate": 384 },
+		"sample_rate": 384,
+		"dynamic_range_dBFS": 385.28,
+		"saturation_value_dBFS": -385 },
 	"27": {
 		"pcm_encoding_docstring": "PCM 64-bit/768 KHz",
 		"bit_depth": 64,
-		"sample_rate": 768 }
+		"sample_rate": 768,
+		"dynamic_range_dBFS": 385.28,
+		"saturation_value_dBFS": -385 }
+		
+};
+
+/**
+@brief The safe dBFS values for saturation to -Infinity dBFS, based on different PCM bit depths. 
+@details The safe dBFS values for saturation to -Infinity dBFS based on different PCM bit depths 
+are determined by the theoretical dynamic range of each bit depth. The dynamic range in dB 
+for a given bit depth can be approximated using the formula:
+
+Dynamic Range (dB) = 6.02 * Bit Depth
+
+This formula derives from the fact that each bit in a digital audio system increases 
+the dynamic range by approximately 6.02 dB, representing the resolution increase afforded 
+by each additional bit. Here's how this applies to the bit depths you mentioned:
+
+Let's calculate the dynamic ranges and then derive the safe dBFS values for saturation 
+to -Infinity dBFS for each bit depth: 11, 16, 24, 32, and 64. */
+const pcm_bit_depth_encoding_recommended_dBFS_saturation_values = {
+    "16": {
+        "dynamic_range_dBFS": 96.32,
+        "saturation_value_dBFS": -96 },
+    "24": {
+        "dynamic_range_dBFS": 144.48,
+        "saturation_value_dBFS": -144 },
+    "32": {
+        "dynamic_range_dBFS": 192.64,
+        "saturation_value_dBFS": -193 },
+    "64": {
+        "dynamic_range_dBFS": 385.28,
+        "saturation_value_dBFS": -385 }
 };
 
 OutJsonBTN.addEventListener('click', function() {
@@ -1269,7 +1363,7 @@ OutJsonBTN.addEventListener('click', function() {
 	showTAElement({ jsonINDIR: 'out' });
 });
 
-/** Object window actions  */
+/** Object window actions */
 
 Object.prototype.last = function(){
 	let self = this;
@@ -1959,7 +2053,11 @@ function generateComplexSignal(
 	const const_inv_hz_pcm_encoding = 1/hz_pcm_encoding;
 	const bit_depth_pcm_encoding = pcm_encoding_docstring_options[pcm_encoding].bit_depth;
 
-	const amplitude_pcm_encoding_resolution = Math.pow(2, bit_depth_pcm_encoding - 1) - 1;
+	const dBFS_Saturation_Minimum = bit_depth_pcm_encoding in pcm_bit_depth_encoding_recommended_dBFS_saturation_values 
+		? pcm_bit_depth_encoding_recommended_dBFS_saturation_values[bit_depth_pcm_encoding].saturation_value_dBFS
+		: pcm_bit_depth_encoding_recommended_dBFS_saturation_values["16"].saturation_value_dBFS;
+
+	const amplitude_pcm_encoding_resolution = Math.pow(2, bit_depth_pcm_encoding - 1) - 1; // preserve the sign bit //
 
 	const amplitude_pcm_encoding_dynamic_range = amplitude_pcm_encoding_resolution / 2;
 
@@ -1998,15 +2096,15 @@ function generateComplexSignal(
 	
 			const start_frame_idx = from.frame;
 			const end_frame_idx = to.frame;
-			const db_start = from.amplitude;
-			const db_end = to.amplitude;
+			const db_start = from.amplitude > dBFS_Saturation_Minimum ? from.amplitude : -Infinity; // amplitude < dBFS_Saturation_Minimum ? (Audio Silence) //
+			const db_end = to.amplitude > dBFS_Saturation_Minimum ? to.amplitude : -Infinity; // amplitude < dBFS_Saturation_Minimum ? (Audio Silence) //
 			const hz_start = from.frequency;
 			const hz_end = to.frequency;
 
 			// Update next interval waveshape params //
 
 			// time characteristics //
-			params.time = t; 
+			params.time = from.frame; 
 			// amplitude characteristics //
 			params.amplitude = db_start;
 			params.amplitudeStart = db_start;
@@ -2082,8 +2180,16 @@ function generateComplexSignal(
 					while(channelDataLeft.length < (t + 1))
 						channelDataLeft.push(0);
 
-					channelDataLeft[t] += outShape; // Careful not to saturate the dynamic range //
+					const dBFS = outShape;
 
+					// Convert dBFS to linear scale //
+					// Handle -Infinity case explicitly //
+					const linearScale = (dBFS === -Infinity) ? 0 : Math.pow(10, dBFS / 20);
+
+					// Scale up N-bit PCM range to utilize full dynamic range //
+					channelDataLeft[t] += linearScale * amplitude_pcm_encoding_dynamic_range; 
+
+					 // Careful not to saturate the audio //
 					channelDataLeft[t] = clamp(
 						  channelDataLeft[t]
 						,-amplitude_pcm_encoding_dynamic_range
@@ -2091,7 +2197,7 @@ function generateComplexSignal(
 
 					++t;
 				} else {
-					throw (`generateComplexSignal > Error: Formant number #:${i}, frame number #: ${frame_idx} Generation Error.`);
+					throw (`generateComplexSignal > Error: Formant [${i}], frame [${frame_idx}] - Processing Error.`);
 				}
 
 			}
@@ -2107,6 +2213,23 @@ function generateComplexSignal(
 	// offset LEFT/RIGHT channel alignment by 1 sample //
 	channelDataLeft.unshift(0);
 	channelDataRight.push(0);
+
+	// encode .WAV headers //
+	const channelLength = channelDataLeft.length;
+	const sampleRate = hz_pcm_encoding; // Unlimited Rate support (default 192000), though Javascript supports up to PCM 384000 Hz Max decodable @ 32-bit ...most of the time.
+	const bitsPerSample = bit_depth_pcm_encoding; // (default 24-bit)
+
+	const duration = channelLength * sampleRate; // (default 1 second) //
+
+	// Left Channel //
+	channelDataLeft.sampleRate = sampleRate;
+	channelDataLeft.bitsPerSample = bitsPerSample;
+	channelDataLeft.duration = duration;
+
+	// Right Channel //
+	channelDataRight.sampleRate = sampleRate;
+	channelDataRight.bitsPerSample = bitsPerSample;
+	channelDataRight.duration = duration;
 
 	return { channelDataLeft, channelDataRight };
 
@@ -2467,6 +2590,7 @@ AudioBTN.addEventListener('click', function() {
 	//const audio_frames = generateComplexSignal(Formants, null);
 
 	//let wavBuffer = bufferToWave([ audio_frames.channelDataLeft, audio_frames.channelDataRight ]);
+
 	let blob = new Blob([wavBuffer], {type: 'audio/wav'});
 	let url = URL.createObjectURL(blob);
 
