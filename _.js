@@ -2040,7 +2040,7 @@ function assignWaveShapeFuncs(fmt, wfm){
 @return The oscillator signal at frame N).*/
 function generateComplexSignal(
 	  shapes_oscilatorParamsVec
-	, customUpdateCallback) {
+	, customUpdateCallback = null) {
 
 	let waveform = new FWaveform();
 	let channelDataLeft = [];
@@ -2542,7 +2542,7 @@ function sinc_interpolation (x, y, t, f) {
 }
 
 AudioBTN.addEventListener('click', function() {
-
+/*
 	// Bard: Here's the JavaScript code to generate a sinusoidal audio wveform of 1s duration at PCM 24 bit/48 kHz sampling:
 
 	// Define desired .WAV audio parameters 
@@ -2570,12 +2570,12 @@ AudioBTN.addEventListener('click', function() {
 
 	for (let i = 0; i < I; ++i) {
 		const time = i / sampleRate; // returns a value between 0 and 1
-		const value = Math.sin(2 * Math.PI * frequency * time) * amplitude;
+		const value = amplitude * Math.sin(2 * Math.PI * frequency * time) ;
 
-		// Ensure the value is positive for dBFS conversion
+		// Ensure the value is positive for linearScale to dBFS conversion
 		const absValue = Math.abs(value);
 
-		// Convert to dBFS and consider the case when absValue is 0
+		// Convert to dBFS, and consider the case when absValue is 0
 		const dBFS = absValue > 0 ? 20 * Math.log10(absValue) : -Infinity;
 
 		const nsample = value * maxInt24; // Scale for 24-bit audio
@@ -2584,12 +2584,12 @@ AudioBTN.addEventListener('click', function() {
 		channelDataRight[i] = (i > 0) ? channelDataLeft[i-1] : 0;  // offset channel samples by 1 for a perceived stereo signal
 	}
 
-	// Example usage
+	// Example usage //
 	let wavBuffer = bufferToWave([channelDataLeft, channelDataRight]);
+*/
+	const audio_frames = generateComplexSignal(Formants);
 
-	//const audio_frames = generateComplexSignal(Formants, null);
-
-	//let wavBuffer = bufferToWave([ audio_frames.channelDataLeft, audio_frames.channelDataRight ]);
+	let wavBuffer = bufferToWave([ audio_frames.channelDataLeft, audio_frames.channelDataRight ]);
 
 	let blob = new Blob([wavBuffer], {type: 'audio/wav'});
 	let url = URL.createObjectURL(blob);
