@@ -173,6 +173,7 @@ Formants[0].push(
 //Formants.prototype.undoStack = [];
 //Formants.prototype.redoStack = [];
 
+// chart.js startup config //
 g_config = {
 	type: 'line',
 	data: {
@@ -943,6 +944,7 @@ function updateActiveBezierRadioButton(rButton, audioComponent) {
 	const amplitudeCurve = 0;
 	const frequencyCurve = 1;
 	const activeFlag = rButton.activeFlag;
+
 	switch (audioComponent) {
 
 		case "amplitude":
@@ -1010,7 +1012,7 @@ AddFramesBTN.addEventListener('click', function() {
 		var lastOSCInterval = formant[I - 1];
 
 		// TODO: Re-sample the audio (scale the frame property of each OSC_INTERVAL object by the new overall length)
-		// TODO: Adjust te length for all formant curves
+		// TODO: Adjust the length for all formant curves
 
 		const nextOSCINterval_frame = lastOSCInterval.frame + dx;
 		const nextOSCInterval_time_step = lastOSCInterval.time_step;
@@ -1146,7 +1148,7 @@ function serializeCustomObject(obj) {
 
 const pcm_encoding_docstring_options = {
     "0": {
-        "pcm_encoding_docstring": "PCM 16-bit/44 KHz",
+        "pcm_encoding_docstring": "PCM 16-bit/44.1 KHz",
         "bit_depth": 16,
         "sample_rate": 44.1,
         "dynamic_range_dBFS": 96.32,
@@ -1160,7 +1162,7 @@ const pcm_encoding_docstring_options = {
         "saturation_value_dBFS": -96
     },
     "2": {
-        "pcm_encoding_docstring": "PCM 16-bit/88 KHz",
+        "pcm_encoding_docstring": "PCM 16-bit/88.2 KHz",
         "bit_depth": 16,
         "sample_rate": 88.2,
         "dynamic_range_dBFS": 96.32,
@@ -1195,7 +1197,7 @@ const pcm_encoding_docstring_options = {
         "saturation_value_dBFS": -96
     },
     "7": {
-        "pcm_encoding_docstring": "PCM 24-bit/44 KHz",
+        "pcm_encoding_docstring": "PCM 24-bit/44.1 KHz",
         "bit_depth": 24,
         "sample_rate": 44.1,
         "dynamic_range_dBFS": 144.48,
@@ -1209,7 +1211,7 @@ const pcm_encoding_docstring_options = {
         "saturation_value_dBFS": -144
     },
 	"9": {
-		"pcm_encoding_docstring": "PCM 24-bit/88 KHz",
+		"pcm_encoding_docstring": "PCM 24-bit/88.2 KHz",
 		"bit_depth": 24,
 		"sample_rate": 88.2,
         "dynamic_range_dBFS": 144.48,
@@ -1239,7 +1241,7 @@ const pcm_encoding_docstring_options = {
         "dynamic_range_dBFS": 144.48,
         "saturation_value_dBFS": -144 },
 	"14": {
-		"pcm_encoding_docstring": "PCM 32-bit/44 KHz",
+		"pcm_encoding_docstring": "PCM 32-bit/44.1 KHz",
 		"bit_depth": 32,
 		"sample_rate": 44.1,
         "dynamic_range_dBFS": 192.64,
@@ -1251,7 +1253,7 @@ const pcm_encoding_docstring_options = {
         "dynamic_range_dBFS": 192.64,
         "saturation_value_dBFS": -193 },
 	"16": {
-		"pcm_encoding_docstring": "PCM 32-bit/88 KHz",
+		"pcm_encoding_docstring": "PCM 32-bit/88.2 KHz",
 		"bit_depth": 32,
 		"sample_rate": 88.2,
         "dynamic_range_dBFS": 192.64,
@@ -1281,7 +1283,7 @@ const pcm_encoding_docstring_options = {
         "dynamic_range_dBFS": 192.64,
         "saturation_value_dBFS": -193 },
 	"21": {
-		"pcm_encoding_docstring": "PCM 64-bit/44 KHz",
+		"pcm_encoding_docstring": "PCM 64-bit/44.1 KHz",
 		"bit_depth": 64,
 		"sample_rate": 44.1,
 		"dynamic_range_dBFS": 385.28,
@@ -1293,11 +1295,11 @@ const pcm_encoding_docstring_options = {
 		"dynamic_range_dBFS": 385.28,
 		"saturation_value_dBFS": -385 },
 	"23": {
-			"pcm_encoding_docstring": "PCM 64-bit/88 KHz",
-			"bit_depth": 64,
-			"sample_rate": 88.2,
-			"dynamic_range_dBFS": 385.28,
-			"saturation_value_dBFS": -385 },
+		"pcm_encoding_docstring": "PCM 64-bit/88.2 KHz",
+		"bit_depth": 64,
+		"sample_rate": 88.2,
+		"dynamic_range_dBFS": 385.28,
+		"saturation_value_dBFS": -385 },
 	"24": {
 		"pcm_encoding_docstring": "PCM 64-bit/96 KHz",
 		"bit_depth": 64,
@@ -2047,7 +2049,7 @@ function generateComplexSignal(
 	let waveform = new FWaveform();
 	let channelDataLeft = [];
 	var defaultInterpolationMethod = LERP;
-	var smoothInterpolationMethod = quarticEaseInOut; // cubicHermite; quarticEaseInOut; sineArcInterpolation; //
+	var smoothInterpolationMethod = quarticEaseInOut; // cubicHermite; //sineArcInterpolation; 
 	const pcm_encoding = shapes_oscilatorParamsVec.pcm_encoding;
 
 	const hz_pcm_encoding = pcm_encoding_docstring_options[pcm_encoding].sample_rate * 1000; // Khz //
@@ -2079,22 +2081,21 @@ function generateComplexSignal(
 		params.sampleRate = hz_pcm_encoding;
 		// amplitude lerp targets //
 		params.amplitudeBlendStrategy = shape_oscillatorParams.amplitude_as_bezierCurve_flag
-		? BLEND_STRATEGY.QUARTIC
-		: BLEND_STRATEGY.LERP;
+			? BLEND_STRATEGY.QUARTIC
+			: BLEND_STRATEGY.LERP;
 		// frequency lerp targets //
 		params.frequencyBlendStrategy = shape_oscillatorParams.frequency_as_bezierCurve_flag
-		? BLEND_STRATEGY.QUARTIC
-		: BLEND_STRATEGY.LERP;
+			? BLEND_STRATEGY.QUARTIC
+			: BLEND_STRATEGY.LERP;
 		// phase charactersitics //
 		params.phase = 0;
 		params.cumulativePhase = 0;
 
 		shape_oscillatorParams.map((from,i,me)=>{
 
-			if(i>=I) 
-				return from;
+			if(i>=I) return from;
 
-			let to = me[i+1];
+			const to = me[i+1];
 	
 			const start_frame_idx = from.frame;
 			const end_frame_idx = to.frame;
@@ -2130,8 +2131,8 @@ function generateComplexSignal(
 
 				params.time = t;
 				
-				const hz_stepRatio = linearStep(t, hz_start, hz_end);
-				const db_stepRatio = linearStep(t, db_start, db_end);
+				const hz_stepRatio = linearStep(t, params.frequencyBlendStartFrame, params.frequencyBlendEndFrame);
+				const db_stepRatio = linearStep(t, params.amplitudeBlendStartFrame, params.amplitudeBlendEndFrame);
 
 				/**
 				
@@ -2164,8 +2165,8 @@ function generateComplexSignal(
 				}
 				
 				params.frequency = const_inv_hz_pcm_encoding * me.frequency_as_bezierCurve_flag 
-				? smoothInterpolationMethod(hz_stepRatio, hz_start, hz_end)
-				: defaultInterpolationMethod(hz_stepRatio, hz_start, hz_end) ;
+					? smoothInterpolationMethod(hz_stepRatio, hz_start, hz_end)
+					: defaultInterpolationMethod(hz_stepRatio, hz_start, hz_end) ;
 
 				if (params.isPhaseSensitive) {
 					// 2. Adjust phase to match the instantaneous phase at the time of frequency change //
@@ -2173,8 +2174,8 @@ function generateComplexSignal(
 				}
 				
 				params.amplitude = me.amplitude_as_bezierCurve_flag 
-				? smoothInterpolationMethod(hz_stepRatio, db_start, db_end)
-				: defaultInterpolationMethod(db_stepRatio, db_start, db_end);
+					? smoothInterpolationMethod(hz_stepRatio, db_start, db_end)
+					: defaultInterpolationMethod(db_stepRatio, db_start, db_end);
 
 				const outShape = shape_oscillatorParams.shape_func(params);
 
