@@ -2210,7 +2210,7 @@ function generateComplexSignal(
 
 	let channelDataRight = [...channelDataLeft];
 
-	// offset LEFT/RIGHT channel alignment by 1 sample //
+	// offset LEFT/RIGHT channel alignment by 1 sample (stereo) //
 	channelDataLeft.unshift(0);
 	channelDataRight.push(0);
 
