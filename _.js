@@ -2140,8 +2140,10 @@ function generateComplexSignal(
 
 				Adjusting the phase in your algorithm to maintain smoothness, 
 				especially during frequency transitions, requires a careful approach. 
+				
 				The goal is to ensure that when the frequency changes, 
 				the phase does not introduce discontinuities or abrupt changes in the waveform. 
+
 				Here's an approach to adjust the phase dynamically to accommodate changes 
 				in frequency smoothly:
 				
