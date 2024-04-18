@@ -130,7 +130,8 @@ class POINT extends Object {
 }
 
 class OSC_INTERVAL extends Object {
-	constructor({ amplitude = g_default_amplitude
+	constructor({ 
+		  amplitude = g_default_amplitude
 		, frequency = g_default_frequency
 		, frame = 0
 		, time_step = 0 } = {}) {
@@ -143,7 +144,8 @@ class OSC_INTERVAL extends Object {
 }
 
 class FORMANTS extends Array {
-	constructor({ shape = "Sine"
+	constructor({ 
+	  shape = "Sine"
 	, amplitude_as_bezierCurve_flag = false
 	, frequency_as_bezierCurve_flag = false } = {}) {
 		super(); // Calls the Array constructor
