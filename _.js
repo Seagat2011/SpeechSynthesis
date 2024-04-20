@@ -2048,18 +2048,20 @@ function generateComplexSignal(
 
 	let waveform = new FWaveform();
 	let channelDataLeft = [];
+	let maxAmplitude = 0;
 	var defaultInterpolationMethod = LERP;
 	var smoothInterpolationMethod = quarticEaseInOut; // cubicHermite; //sineArcInterpolation; 
 	const pcm_encoding = shapes_oscilatorParamsVec.pcm_encoding;
 
-	const hz_pcm_encoding = pcm_encoding_docstring_options[pcm_encoding].sample_rate * 1000; // Khz //
+	const hz_pcm_encoding = pcm_encoding_docstring_options[pcm_encoding].sample_rate * 1000; // to Khz //
 
 	const const_inv_hz_pcm_encoding = 1/hz_pcm_encoding;
 	const bit_depth_pcm_encoding = pcm_encoding_docstring_options[pcm_encoding].bit_depth;
+	const default_16BitDepthEncoding = "16";
 
 	const dBFS_Saturation_Minimum = bit_depth_pcm_encoding in pcm_bit_depth_encoding_recommended_dBFS_saturation_values 
 		? pcm_bit_depth_encoding_recommended_dBFS_saturation_values[bit_depth_pcm_encoding].saturation_value_dBFS
-		: pcm_bit_depth_encoding_recommended_dBFS_saturation_values["16"].saturation_value_dBFS;
+		: pcm_bit_depth_encoding_recommended_dBFS_saturation_values[default_16BitDepthEncoding].saturation_value_dBFS;
 
 	const amplitude_pcm_encoding_resolution = Math.pow(2, bit_depth_pcm_encoding - 1) - 1; // preserve the sign bit //
 
@@ -2192,15 +2194,15 @@ function generateComplexSignal(
 					const linearScale = (dBFS === -Infinity) ? 0 : Math.pow(10, dBFS / 20);
 
 					// Scale up N-bit PCM range to utilize full dynamic range //
-					channelDataLeft[t] += linearScale * amplitude_pcm_encoding_dynamic_range; 
+					const linearScaleUpscaledSampleValue = linearScale * amplitude_pcm_encoding_dynamic_range; 
 
-					 // Careful not to saturate the audio //
-					channelDataLeft[t] = clamp(
-						  channelDataLeft[t]
-						,-amplitude_pcm_encoding_dynamic_range
-						, amplitude_pcm_encoding_dynamic_range);
+					channelDataLeft[t] += linearScaleUpscaledSampleValue;
+
+					// Careful not to saturate the audio //
+					maxAmplitude = Math.max(maxAmplitude, Math.abs(linearScaleUpscaledSampleValue));					 
 
 					++t;
+
 				} else {
 					throw (`generateComplexSignal > Error: Formant [${i}], frame [${frame_idx}] - Processing Error.`);
 				}
@@ -2212,6 +2214,18 @@ function generateComplexSignal(
 		});
 
 	} // End for(shape_oscillatorParams of shapes_oscilatorParamsVec)
+	
+	// Normalize the audio to avoid saturation- or required clamping, and subsequent clipping //
+    if (maxAmplitude > amplitude_pcm_encoding_dynamic_range) {
+		console.info(`Signal amplitude exceeds preset PCM ${bit_depth_pcm_encoding}-bit dynamic range; clipping has occurred! Normalizing audio...`);
+        const normalizationFactor = amplitude_pcm_encoding_dynamic_range / maxAmplitude;
+
+        for (let i = 0; i < channelDataLeft.length; i++) {
+            channelDataLeft[i] *= normalizationFactor;
+        }
+
+		console.info("Done.");
+    }
 
 	let channelDataRight = [...channelDataLeft];
 
