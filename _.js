@@ -2039,11 +2039,11 @@ function assignWaveShapeFuncs(fmt, wfm){
 /**
 @brief Generates complex signal based on specific wave-shape parameters.
 @details Generates complex signal based on specific wave-shape parameters.
-@param shapes_oscilatorParamsVec: The complex wave-shapes to develop (ie. Formants[]).
+@param shapes_oscillatorParamsVec: The complex wave-shapes to develop (ie. Formants[]).
 @param customUpdateCallback: An (optional) lambda that can be used to update the oscillator parameters, instead.
 @return The oscillator signal at frame N).*/
 function generateComplexSignal(
-	  shapes_oscilatorParamsVec
+	  shapes_oscillatorParamsVec
 	, customUpdateCallback = null) {
 
 	let waveform = new FWaveform();
@@ -2051,7 +2051,7 @@ function generateComplexSignal(
 	let maxAmplitude = 0;
 	var defaultInterpolationMethod = LERP;
 	var smoothInterpolationMethod = quarticEaseInOut; // cubicHermite; //sineArcInterpolation; 
-	const pcm_encoding = shapes_oscilatorParamsVec.pcm_encoding;
+	const pcm_encoding = shapes_oscillatorParamsVec.pcm_encoding;
 
 	const hz_pcm_encoding = pcm_encoding_docstring_options[pcm_encoding].sample_rate * 1000; // to Khz //
 
@@ -2067,9 +2067,9 @@ function generateComplexSignal(
 
 	const amplitude_pcm_encoding_dynamic_range = amplitude_pcm_encoding_resolution / 2;
 
-	assignWaveShapeFuncs(shapes_oscilatorParamsVec, waveform);
+	assignWaveShapeFuncs(shapes_oscillatorParamsVec, waveform);
 		
-	for (const shape_oscillatorParams of shapes_oscilatorParamsVec) {
+	for (const shape_oscillatorParams of shapes_oscillatorParamsVec) {
 
 		const I = shape_oscillatorParams.length - 1;
 
@@ -2213,7 +2213,7 @@ function generateComplexSignal(
 
 		});
 
-	} // End for(shape_oscillatorParams of shapes_oscilatorParamsVec)
+	} // End for(shape_oscillatorParams of shapes_oscillatorParamsVec)
 	
 	// Normalize the audio to avoid saturation- or required clamping, and subsequent clipping //
     if (maxAmplitude > amplitude_pcm_encoding_dynamic_range) {
