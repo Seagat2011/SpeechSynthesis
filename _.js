@@ -1830,7 +1830,12 @@ function generateWhiteGaussianNoise(length) {
   }
   
   /*
-  // Example usage
+	Example usage: 
+	
+	We map over each sample in the phone array and check if its corresponding frequency falls within the specified frequency range (lowFreq to highFreq). If it does, we replace the sinusoidal sample with the corresponding filtered noise sample. Otherwise, we keep the original sinusoidal sample.
+This approach effectively carves the sinusoidal signal out of the filtered white Gaussian noise within the specified frequency range, similar to how diffusion models carve audio out of a Gaussian noise canvas.
+Remember to adjust the frequency range (lowFreq and highFreq) based on the desired frequency bands you want to replace with the filtered noise samples.* /
+
   let phone = [...]; // Sinusoidal signal for speech synthesis
   const sampleRate = 44100; // Sample rate in Hz
   const lowFreq = 300; // Lower frequency limit of the bandpass filter
@@ -1840,7 +1845,14 @@ function generateWhiteGaussianNoise(length) {
   const noise = generateWhiteGaussianNoise(phone.length);
   const filteredNoise = applyBandpassFilter(noise, sampleRate, lowFreq, highFreq);
   
-  const carvedSignal = phone.map((value, index) => value + noiseAmplitude * filteredNoise[index]);
+  const carvedSignal = phone.map((value, index) => {
+  const freq = (index / phone.length) * sampleRate;
+  if (freq >= lowFreq && freq <= highFreq) {
+    return filteredNoise[index];
+  } else {
+    return value;
+  }
+});
   */
 
 /**
