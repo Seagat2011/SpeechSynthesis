@@ -1782,6 +1782,68 @@ class FWaveform extends Object {
 } // end of FWaveform
 
 /**
+ * @brief generateWhiteGaussianNoise
+ * @param length 
+ * @returns noise
+ */
+function generateWhiteGaussianNoise(length) {
+	const noise = [];
+	for (let i = 0; i < length; i++) {
+	  noise.push(gaussianRandom());
+	}
+	return noise;
+  }
+  
+  /**
+   * @brief gaussianRandom
+   * @returns value
+   */
+  function gaussianRandom() {
+	let u = 0, v = 0;
+	while (u === 0) u = Math.random();
+	while (v === 0) v = Math.random();
+	return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  }
+  
+  /**
+   * @brief applyBandpassFilter
+   * @param signal 
+   * @param sampleRate 
+   * @param lowFreq 
+   * @param highFreq 
+   * @returns filteredSignal
+   */
+  function applyBandpassFilter(signal, sampleRate, lowFreq, highFreq) {
+	const n = signal.length;
+	const filteredSignal = new Array(n).fill(0);
+  
+	for (let i = 0; i < n; i++) {
+	  for (let j = 0; j < n; j++) {
+		const freq = (j / n) * sampleRate;
+		if (freq >= lowFreq && freq <= highFreq) {
+		  filteredSignal[i] += signal[j] * Math.cos((2 * Math.PI * i * j) / n);
+		}
+	  }
+	}
+  
+	return filteredSignal;
+  }
+  
+  /*
+  // Example usage
+  let phone = [...]; // Sinusoidal signal for speech synthesis
+  const sampleRate = 44100; // Sample rate in Hz
+  const lowFreq = 300; // Lower frequency limit of the bandpass filter
+  const highFreq = 3400; // Upper frequency limit of the bandpass filter
+  const noiseAmplitude = 0.1; // Amplitude of the added noise
+  
+  const noise = generateWhiteGaussianNoise(phone.length);
+  const filteredNoise = applyBandpassFilter(noise, sampleRate, lowFreq, highFreq);
+  
+  const carvedSignal = phone.map((value, index) => value + noiseAmplitude * filteredNoise[index]);
+  */
+
+/**
 @brief linear spline (interpolation) function.
 @details linear spline (interpolation) function.
 @param pts - The formant object.
