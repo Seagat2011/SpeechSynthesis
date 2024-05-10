@@ -2855,6 +2855,7 @@ var chart_viewer_config = {
 
 Cpp20BTN.addEventListener('click', function() {
 
+	/* Example:
 	// Bard: Here's the JavaScript code to generate a sinusoidal audio wveform of 1s duration at PCM 24 bit/48 kHz sampling:
 
 	// Define desired .WAV audio parameters 
@@ -2895,7 +2896,13 @@ Cpp20BTN.addEventListener('click', function() {
 		channelDataLeft[i] = nsample;
 		channelDataRight[i] = (i > 0) ? channelDataLeft[i-1] : 0;  // offset channel samples by 1 for a perceived stereo signal
 	}
+	*/
 
+	const rawSignalPreviewBuffer = generateComplexSignal(Formants, null);
+
+	const channelDataLeft = rawSignalPreviewBuffer.channelDataLeft;
+	const channelDataRight = rawSignalPreviewBuffer.channelDataRight;
+	
 	showOverlayWithData( [
 		  Array.from(channelDataLeft, (chart_amplitude/* item */, chart_frame /* idx*/) => ({ y:chart_amplitude, x:chart_frame }))
 		, Array.from(channelDataRight, (chart_amplitude/* item */, chart_frame /* idx*/) => ({ y:chart_amplitude, x:chart_frame }))] );
