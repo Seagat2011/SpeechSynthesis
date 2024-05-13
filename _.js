@@ -2300,6 +2300,14 @@ function generateComplexSignal(
 
 		console.info("Done.");
     }
+		
+	// re-Calculate the average amplitude, for correcting the DC offset  
+	const avgAmplitude = channelDataLeft.reduce((sum, sample) => sum + sample, 0) / channelDataLeft.length;
+
+	// Remove the DC offset by subtracting the average amplitude from each sample
+	for (let i = 0; i < channelDataLeft.length; i++) {
+		channelDataLeft[i] -= avgAmplitude;
+	}
 
 	let channelDataRight = [...channelDataLeft];
 
