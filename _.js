@@ -2268,12 +2268,12 @@ function generateComplexSignal(
 					const linearScale = (dBFS === -Infinity) ? 0 : Math.pow(10, dBFS / 20);
 
 					// Scale up N-bit PCM range to utilize full dynamic range //
-					const linearScaleUpscaledSampleValue = linearScale * amplitude_pcm_encoding_dynamic_range; 
+					const scaledAmplitude = Math.round(linearScale * amplitude_pcm_encoding_dynamic_range);
 
-					channelDataLeft[t] += linearScaleUpscaledSampleValue;
+					channelDataLeft[t] += scaledAmplitude;
 
 					// Careful not to saturate the audio //
-					maxAmplitude = Math.max(maxAmplitude, Math.abs(linearScaleUpscaledSampleValue));					 
+					maxAmplitude = Math.max(maxAmplitude, Math.abs(scaledAmplitude));					 
 
 					++t;
 
