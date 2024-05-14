@@ -2928,6 +2928,10 @@ function showOverlayWithData(data) {
 		waveform_viewer_canvas.style.borderColor = "black";
 		// Initialize the chart if it doesn't exist
 		window.overlayChart = new Chart(ctx, chart_viewer_config);
+
+		// Update the y-axis label
+		window.overlayChart.options.scales['y-axis-amplitude-L'].title.text = "L-Amplitude";
+		window.overlayChart.options.scales['y-axis-amplitude-R'].title.text = "R-Amplitude";
 	}
 
 	const leftChannelData = 0;
