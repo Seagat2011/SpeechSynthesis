@@ -2254,6 +2254,19 @@ function generateComplexSignal(
 				params.amplitude = me.amplitude_as_bezierCurve_flag 
 					? smoothInterpolationMethod(hz_stepRatio, db_start, db_end)
 					: defaultInterpolationMethod(db_stepRatio, db_start, db_end);
+	
+				const dBFS = params.amplitude;
+
+				/* 
+				Convert dBFS to linear scale. dBFS scale is logarithmic, 
+				while the amplitude values used in trigonometric functions 
+				for waveform generation are typically in the linear scale;
+				thus, the conversion from dBFS to linear amplitude should be done 
+				prior to employing this amplitude in the waveform generation formula.
+				*/
+
+				// Handle -Infinity case explicitly //
+				params.amplitude = (dBFS === -Infinity) ? 0 : Math.pow(10, dBFS / 20);
 
 				const outShape = shape_oscillatorParams.shape_func(params);
 
@@ -2261,18 +2274,14 @@ function generateComplexSignal(
 					while(channelDataLeft.length < (t + 1))
 						channelDataLeft.push(0);
 
-					const dBFS = outShape;
+					const linearScale = outShape;
 
-					// Convert dBFS to linear scale //
-					// Handle -Infinity case explicitly //
-					const linearScale = (dBFS === -Infinity) ? 0 : Math.pow(10, dBFS / 20);
-
-					// Scale up N-bit PCM range to utilize full dynamic range //
+					// Scale up to N-bit PCM range to utilize full dynamic range //
 					const scaledAmplitude = Math.round(linearScale * amplitude_pcm_encoding_dynamic_range);
 
 					channelDataLeft[t] += scaledAmplitude;
 
-					// Careful not to saturate the audio //
+					// Careful not to saturate the audio! Record maxAmplitude //
 					maxAmplitude = Math.max(maxAmplitude, Math.abs(scaledAmplitude));					 
 
 					++t;
